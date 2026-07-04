@@ -54,6 +54,14 @@ class FakeProxySettings:
             merged["Cookie"] = "; ".join(f"{key}={value}" for key, value in self.bundle.cookies.items())
         return merged
 
+    def get_profile(self, **kwargs):
+        from services.proxy_service import ProxyRuntimeProfile
+        return ProxyRuntimeProfile(
+            proxy_url="http://runtime.example:8118",
+            runtime_enabled=True,
+            clearance={"enabled": True, "mode": "flaresolverr"},
+        )
+
     def refresh_clearance(self, target_url="", proxy="", force=False, upstream=True, **kwargs):
         self.refresh_calls.append({"target_url": target_url, "proxy": proxy, "force": force, "upstream": upstream})
         self.refreshed = self.bundle is not None

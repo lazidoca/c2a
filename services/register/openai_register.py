@@ -803,7 +803,7 @@ def worker(index: int) -> dict:
     try:
         step(index, "Task started")
         result = registrar.register(mailbox, email, index)
-        if env_proxy:
+        if final_proxy:
             result["proxy"] = final_proxy
             step(index, f"Saving registration proxy with the created account: {final_proxy}")
         cost = time.time() - start

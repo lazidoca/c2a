@@ -741,23 +741,7 @@ class PlatformRegistrar:
         step(index, "Token exchange completed")
         return tokens
 
-    def register(self, index: int) -> dict:
-        step(index, "Starting to create mailbox")
-        mailbox = create_mailbox(register_proxy=self.proxy)
-        email = str(mailbox.get("address") or "").strip()
-        if not email:
-            mail_provider.release_mailbox(mailbox)
-            raise RuntimeError("Mailbox service did not return address")
-        label = str(mailbox.get("label") or "")
-        step(index, f"Mailbox creation completed [{label}]: {email}")
-        
-        # Dynamically append email session to proxy username if configured via env
-        new_proxy = _build_register_proxy(email)
-        if new_proxy:
-            self.proxy = new_proxy
-            self.session.proxies = {"all": new_proxy}
-            step(index, f"Using dynamic session proxy for registration: {new_proxy}")
-
+    def register(self, mailbox: dict, email: str, index: int) -> dict:
         try:
             password = _random_password()
             first_name, last_name = _random_name()
@@ -790,26 +774,38 @@ class PlatformRegistrar:
 def worker(index: int) -> dict:
     start = time.time()
     
-    # Registration proxy override from environment variables
+    # 1. Determine static proxy for mailbox creation
     env_proxy = _build_register_proxy()
     if env_proxy:
-        proxy = env_proxy
-        step(index, f"Using registration proxy from environment: {proxy}")
+        static_proxy = env_proxy
     elif config.get("proxy_rotating_enabled"):
         rotating_proxy_manager.update_keys(config.get("proxy_rotating_keys") or [])
-        fetched_proxy = rotating_proxy_manager.get_proxy()
-        if fetched_proxy:
-            proxy = fetched_proxy
-            step(index, f"Using rotating proxy: {proxy}")
-        else:
-            step(index, "No rotating proxy available, falling back to default proxy", "yellow")
+        static_proxy = rotating_proxy_manager.get_proxy() or ""
     else:
-        proxy = config.get("proxy") or ""
-            
-    registrar = PlatformRegistrar(proxy)
+        static_proxy = config.get("proxy") or ""
+        
+    # 2. Create mailbox using static proxy
+    step(index, "Starting to create mailbox")
+    mailbox = create_mailbox(register_proxy=static_proxy)
+    email = str(mailbox.get("address") or "").strip()
+    if not email:
+        mail_provider.release_mailbox(mailbox)
+        raise RuntimeError("Mailbox service did not return address")
+    label = str(mailbox.get("label") or "")
+    step(index, f"Mailbox creation completed [{label}]: {email}")
+    
+    # 3. Determine the final registration proxy (with email session suffix if env is used)
+    final_proxy = _build_register_proxy(email) if env_proxy else static_proxy
+    if final_proxy:
+        if env_proxy:
+            step(index, f"Using registration proxy from environment: {final_proxy}")
+        elif config.get("proxy_rotating_enabled") and static_proxy:
+            step(index, f"Using rotating proxy: {final_proxy}")
+        
+    registrar = PlatformRegistrar(final_proxy)
     try:
         step(index, "Task started")
-        result = registrar.register(index)
+        result = registrar.register(mailbox, email, index)
         cost = time.time() - start
         access_token = str(result["access_token"])
         account_service.add_account_items([result])

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import base64
 import hashlib
 import json
@@ -742,7 +743,28 @@ class PlatformRegistrar:
 def worker(index: int) -> dict:
     start = time.time()
     proxy = config.get("proxy") or ""
-    if config.get("proxy_rotating_enabled"):
+    
+    # Registration proxy override from environment variables
+    env_ip = os.environ.get("CHATGPT2API_REGISTER_PROXY_IP") or os.environ.get("REGISTER_PROXY_IP")
+    env_port = os.environ.get("CHATGPT2API_REGISTER_PROXY_PORT") or os.environ.get("REGISTER_PROXY_PORT")
+    env_user = os.environ.get("CHATGPT2API_REGISTER_PROXY_USERNAME") or os.environ.get("REGISTER_PROXY_USERNAME")
+    env_pass = os.environ.get("CHATGPT2API_REGISTER_PROXY_PASSWORD") or os.environ.get("REGISTER_PROXY_PASSWORD")
+    
+    if env_ip and env_port:
+        env_ip = env_ip.strip()
+        env_port = env_port.strip()
+        if "://" in env_ip:
+            scheme, _, host = env_ip.partition("://")
+            env_ip = host
+        else:
+            scheme = "http"
+            
+        if env_user and env_pass:
+            proxy = f"{scheme}://{env_user.strip()}:{env_pass.strip()}@{env_ip}:{env_port}"
+        else:
+            proxy = f"{scheme}://{env_ip}:{env_port}"
+        step(index, f"Using registration proxy from environment: {proxy}")
+    elif config.get("proxy_rotating_enabled"):
         rotating_proxy_manager.update_keys(config.get("proxy_rotating_keys") or [])
         fetched_proxy = rotating_proxy_manager.get_proxy()
         if fetched_proxy:
@@ -750,6 +772,7 @@ def worker(index: int) -> dict:
             step(index, f"Using rotating proxy: {proxy}")
         else:
             step(index, "No rotating proxy available, falling back to default proxy", "yellow")
+            
     registrar = PlatformRegistrar(proxy)
     try:
         step(index, "Task started")

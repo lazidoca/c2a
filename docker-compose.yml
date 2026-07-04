@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "3005:80"
+    env_file:
+      - .env
     volumes:
       - ./data:/app/data
       - ./config.json:/app/config.json
@@ -23,7 +25,13 @@ services:
       # - GIT_FILE_PATH=accounts.json
       
       # 认证密钥 (可选，覆盖 config.json)
-      # - CHATGPT2API_AUTH_KEY=your_secret_key
+       - CHATGPT2API_AUTH_KEY=${CHATGPT2API_AUTH_KEY}
       
       # 基础 URL (可选)
       # - CHATGPT2API_BASE_URL=https://your-domain.com
+
+      # 注册代理配置 (可选)
+       - CHATGPT2API_REGISTER_PROXY_IP=${CHATGPT2API_REGISTER_PROXY_IP}
+       - CHATGPT2API_REGISTER_PROXY_PORT=${CHATGPT2API_REGISTER_PROXY_PORT}
+       - CHATGPT2API_REGISTER_PROXY_USERNAME=${CHATGPT2API_REGISTER_PROXY_USERNAME}
+       - CHATGPT2API_REGISTER_PROXY_PASSWORD=${CHATGPT2API_REGISTER_PROXY_PASSWORD}

@@ -14,7 +14,7 @@ services:
       
       # 数据库配置 (当 STORAGE_BACKEND=sqlite/postgres 时使用)
       # - DATABASE_URL=postgresql://user:password@host:5432/dbname
-       - DATABASE_URL=sqlite:///app/data/accounts.db
+       - DATABASE_URL=sqlite:////app/data/accounts.db
       
       # Git 仓库配置 (当 STORAGE_BACKEND=git 时使用)
       # - GIT_REPO_URL=https://github.com/user/repo.git

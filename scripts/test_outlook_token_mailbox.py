@@ -61,12 +61,12 @@ def parse_credentials(path: Path) -> list[OutlookCredential]:
     credentials: list[OutlookCredential] = []
     for line_number, raw_line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), start=1):
         line = _clean(raw_line)
-        if not line or "----" not in line:
+        if not line or "|" not in line:
             continue
-        parts = [_clean(part) for part in line.split("----", 3)]
+        parts = [_clean(part) for part in line.split("|", 3)]
         if len(parts) != 4:
             continue
-        email, password, client_id, refresh_token = parts
+        email, password, refresh_token, client_id = parts
         if "@" not in email or not client_id or not refresh_token:
             continue
         credentials.append(
@@ -316,7 +316,7 @@ def test_credential(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Test Outlook/Hotmail mailbox access from lines formatted as email----password----client_id----refresh_token.",
+        description="Test Outlook/Hotmail mailbox access from lines formatted as email|password|refresh_token|client_id.",
     )
     parser.add_argument("--file", default=r"D:\Desktop\yx.txt", help="Credential text file path.")
     parser.add_argument("--mode", choices=("auto", "graph", "imap"), default="auto", help="Mailbox read method.")

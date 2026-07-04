@@ -329,14 +329,14 @@ export function RegisterCard() {
                       const stats = (provider.mailboxes_stats || {}) as Record<string, number>;
                       const savedCount = Number(provider.mailboxes_count || 0);
                       const preview = Array.isArray(provider.mailboxes_preview) ? (provider.mailboxes_preview as string[]) : [];
-                      const pendingCount = String(provider.mailboxes || "").split(/\r?\n/).filter((line) => line.includes("----") && line.split("----").length >= 4).length;
+                      const pendingCount = String(provider.mailboxes || "").split(/\r?\n/).filter((line) => line.includes("|") && line.split("|").length >= 4).length;
                       return (
                         <div className="space-y-2">
                           <label className="flex items-center justify-between text-sm text-stone-700">
                             <span>Nhập pool email <span className="text-red-400">*</span></span>
                             <span className="text-xs text-stone-400">đã lưu {savedCount} một{pendingCount ? ` · Các mục ${pendingCount} sẽ được nhập` : ""}</span>
                           </label>
-                          <Textarea value={String(provider.mailboxes || "")} onChange={(event) => updateProvider(index, { mailboxes: event.target.value })} placeholder={"Một email trên mỗi dòng, định dạng:\nEmail----Mật khẩu----client_id----refresh_token\n(Vì lý do bảo mật, mật khẩu/refresh_token đã lưu sẽ không được lặp lại; mật khẩu này chỉ được sử dụng để thêm hoặc ghi đè)"} className="min-h-32 rounded-xl border-stone-200 bg-white font-mono text-xs" disabled={config.enabled} />
+                          <Textarea value={String(provider.mailboxes || "")} onChange={(event) => updateProvider(index, { mailboxes: event.target.value })} placeholder={"Một email trên mỗi dòng, định dạng:\nEmail|Mật khẩu|refresh_token|client_id\n(Vì lý do bảo mật, mật khẩu/refresh_token đã lưu sẽ không được lặp lại; mật khẩu này chỉ được sử dụng để thêm hoặc ghi đè)"} className="min-h-32 rounded-xl border-stone-200 bg-white font-mono text-xs" disabled={config.enabled} />
                           <div className="flex flex-wrap items-center gap-1.5 text-xs">
                             <span className="rounded-md bg-stone-100 px-2 py-1 text-stone-600">Không được sử dụng {stats.unused ?? 0}</span>
                             <span className="rounded-md bg-blue-50 px-2 py-1 text-blue-600">chiếm đóng {stats.in_use ?? 0}</span>

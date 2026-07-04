@@ -1137,17 +1137,17 @@ def _clean_outlook_value(value: str) -> str:
 
 
 def parse_outlook_credentials(text: str) -> list[dict[str, str]]:
-    """Parses mailbox pool text, format per line: email----password----client_id----refresh_token."""
+    """Parses mailbox pool text, format per line: email|password|refresh_token|client_id."""
     credentials: list[dict[str, str]] = []
     seen: set[str] = set()
     for raw_line in str(text or "").splitlines():
         line = _clean_outlook_value(raw_line)
-        if not line or "----" not in line:
+        if not line or "|" not in line:
             continue
-        parts = [_clean_outlook_value(part) for part in line.split("----", 3)]
+        parts = [_clean_outlook_value(part) for part in line.split("|", 3)]
         if len(parts) != 4:
             continue
-        email, password, client_id, refresh_token = parts
+        email, password, refresh_token, client_id = parts
         if "@" not in email or not client_id or not refresh_token:
             continue
         key = email.lower()
@@ -1180,7 +1180,7 @@ def _normalize_outlook_pool(value: Any) -> list[dict[str, str]]:
 class OutlookTokenProvider(BaseMailProvider):
     """Uses refresh_token to read Outlook/Hotmail mailbox verification codes.
 
-    The mailbox pool is maintained in the application configuration (mailboxes field, each line: email----password----client_id----refresh_token),
+    The mailbox pool is maintained in the application configuration (mailboxes field, each line: email|password|refresh_token|client_id),
     create_mailbox() retrieves the next unused email from the pool, and wait_for_code() exchanges refresh_token for access_token
     and reads the latest mail via Graph/IMAP.
     """
@@ -1236,7 +1236,7 @@ class OutlookTokenProvider(BaseMailProvider):
 
     def create_mailbox(self, username: str | None = None) -> dict[str, Any]:
         if not self.pool:
-            raise RuntimeError("OutlookToken mailbox pool is empty, please import email----password----client_id----refresh_token in mail configuration")
+            raise RuntimeError("OutlookToken mailbox pool is empty, please import email|password|refresh_token|client_id in mail configuration")
         with _outlook_token_state_lock:
             store = _load_outlook_token_state()
             credential = next((item for item in self.pool if _outlook_entry_available(store.get(item["email"].strip().lower()))), None)

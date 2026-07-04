@@ -774,19 +774,9 @@ class PlatformRegistrar:
 def worker(index: int) -> dict:
     start = time.time()
     
-    # 1. Determine static proxy for mailbox creation
-    env_proxy = _build_register_proxy()
-    if env_proxy:
-        static_proxy = env_proxy
-    elif config.get("proxy_rotating_enabled"):
-        rotating_proxy_manager.update_keys(config.get("proxy_rotating_keys") or [])
-        static_proxy = rotating_proxy_manager.get_proxy() or ""
-    else:
-        static_proxy = config.get("proxy") or ""
-        
-    # 2. Create mailbox using static proxy
+    # 1. Create mailbox directly without proxy
     step(index, "Starting to create mailbox")
-    mailbox = create_mailbox(register_proxy=static_proxy)
+    mailbox = create_mailbox(register_proxy="")
     email = str(mailbox.get("address") or "").strip()
     if not email:
         mail_provider.release_mailbox(mailbox)
@@ -794,18 +784,28 @@ def worker(index: int) -> dict:
     label = str(mailbox.get("label") or "")
     step(index, f"Mailbox creation completed [{label}]: {email}")
     
-    # 3. Determine the final registration proxy (with email session suffix if env is used)
-    final_proxy = _build_register_proxy(email) if env_proxy else static_proxy
-    if final_proxy:
-        if env_proxy:
-            step(index, f"Using registration proxy from environment: {final_proxy}")
-        elif config.get("proxy_rotating_enabled") and static_proxy:
+    # 2. Determine proxy for registration
+    env_proxy = None
+    if config.get("proxy_rotating_enabled"):
+        rotating_proxy_manager.update_keys(config.get("proxy_rotating_keys") or [])
+        final_proxy = rotating_proxy_manager.get_proxy() or ""
+        if final_proxy:
             step(index, f"Using rotating proxy: {final_proxy}")
+    else:
+        env_proxy = _build_register_proxy(email)
+        if env_proxy:
+            final_proxy = env_proxy
+            step(index, f"Using registration proxy from environment: {final_proxy}")
+        else:
+            final_proxy = config.get("proxy") or ""
         
     registrar = PlatformRegistrar(final_proxy)
     try:
         step(index, "Task started")
         result = registrar.register(mailbox, email, index)
+        if env_proxy:
+            result["proxy"] = final_proxy
+            step(index, f"Saving registration proxy with the created account: {final_proxy}")
         cost = time.time() - start
         access_token = str(result["access_token"])
         account_service.add_account_items([result])

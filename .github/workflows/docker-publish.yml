@@ -20,6 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create dummy config.json if not present
+        run: |
+          if [ ! -f config.json ]; then
+            echo '{}' > config.json
+          fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:

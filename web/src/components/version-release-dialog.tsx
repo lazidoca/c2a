@@ -15,10 +15,10 @@ import { useVersionCheck } from "@/hooks/use-version-check";
 import { cn } from "@/lib/utils";
 
 function typeVariant(type: string): "success" | "danger" | "info" | "violet" | "outline" {
-  if (type === "Mới") return "success";
-  if (type === "sửa chữa") return "danger";
-  if (type === "điều chỉnh") return "info";
-  if (type === "Tài liệu") return "violet";
+  if (type === "New" || type === "Mới") return "success";
+  if (type === "Fix" || type === "sửa chữa") return "danger";
+  if (type === "Adjust" || type === "điều chỉnh") return "info";
+  if (type === "Docs" || type === "Tài liệu") return "violet";
   return "outline";
 }
 
@@ -43,7 +43,7 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
           className,
         )}
         onClick={openReleaseModal}
-        title="View cập nhật phiên bản"
+        title="View version updates"
       >
         v{webConfig.appVersion}
         {hasNewVersion ? (
@@ -53,12 +53,12 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-[min(94vw,680px)] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Cập nhật phiên bản</DialogTitle>
+            <DialogTitle>Version Updates</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
-            <VersionCard label="Phiên bản hiện tại" value={webConfig.appVersion} />
+            <VersionCard label="Current Version" value={webConfig.appVersion} />
             <VersionCard
-              label="phiên bản mới nhất"
+              label="Latest Version"
               value={latestVersion}
               action={
                 <button
@@ -66,7 +66,7 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
                   className="text-[11px] text-stone-400 underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-stone-200"
                   onClick={() => void checkLatestRelease(true)}
                 >
-                  {checking ? "Đang kiểm tra..." : "Kiểm tra các bản cập nhật"}
+                  {checking ? "Checking..." : "Check for updates"}
                 </button>
               }
             />
@@ -76,11 +76,11 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
               <div key={release.version} className="border-l border-stone-200 pl-4 dark:border-white/10">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-semibold text-stone-950 dark:text-stone-100">
-                    {release.version === "Unreleased" ? "Chưa được xuất bản" : release.version}
+                    {release.version === "Unreleased" ? "Unreleased" : release.version}
                   </span>
                   <span className="text-xs text-stone-500 dark:text-stone-400">{release.date}</span>
-                  {release.version === latestVersion ? <Badge variant="success">Mới nhất</Badge> : null}
-                  {release.version === webConfig.appVersion ? <Badge variant="outline">hiện tại</Badge> : null}
+                  {release.version === latestVersion ? <Badge variant="success">Latest</Badge> : null}
+                  {release.version === webConfig.appVersion ? <Badge variant="outline">Current</Badge> : null}
                 </div>
                 <div className="mt-2 space-y-1.5">
                   {release.items.map((item, index) => (
@@ -97,7 +97,7 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
           </div>
           <Button variant="outline" size="sm" asChild>
             <a href="https://github.com/basketikun/chatgpt2api" target="_blank" rel="noreferrer">
-              Đi đến GitHub cập nhật
+              Go to GitHub updates
             </a>
           </Button>
         </DialogContent>

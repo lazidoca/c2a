@@ -27,15 +27,15 @@ export function CPAPoolsCard() {
               <ServerCog className="size-5 text-stone-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Quản lý kết nối CPA</h2>
-              <p className="text-sm text-stone-500">Trước tiên hãy định cấu hình kết nối, sau đó truy vấn accounts từ xa nếu cần và chọn nhập nó vào pool accounts cục bộ.</p>
+              <h2 className="text-lg font-semibold tracking-tight">CPA Connections</h2>
+              <p className="text-sm text-stone-500">Configure connections to fetch remote accounts and import them into the local pool.</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {pools.length > 0 ? <Badge className="rounded-md px-2.5 py-1">{pools.length} kết nối</Badge> : null}
+            {pools.length > 0 ? <Badge className="rounded-md px-2.5 py-1">{pools.length} connections</Badge> : null}
             <Button className="h-9 rounded-xl bg-stone-950 px-4 text-white hover:bg-stone-800" onClick={openAddDialog}>
               <Plus className="size-4" />
-              Thêm kết nối
+              Add Connection
             </Button>
           </div>
         </div>
@@ -48,8 +48,8 @@ export function CPAPoolsCard() {
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-stone-50 px-6 py-10 text-center">
             <ServerCog className="size-8 text-stone-300" />
             <div className="space-y-1">
-              <p className="text-sm font-medium text-stone-600">Chưa có kết nối CPA</p>
-              <p className="text-sm text-stone-400">Nhấp vào "Thêm kết nối" để lưu thông tin CLIProxyAPI của bạn.</p>
+              <p className="text-sm font-medium text-stone-600">No CPA Connections Found</p>
+              <p className="text-sm text-stone-400">Click &quot;Add Connection&quot; to save your CLIProxyAPI details.</p>
             </div>
           </div>
         ) : (
@@ -106,21 +106,21 @@ export function CPAPoolsCard() {
                       ) : (
                         <Import className="size-3.5" />
                       )}
-                      đồng bộ hóa
+                      Sync
                     </Button>
                   </div>
 
                   {importJob ? (
                     <div className="space-y-2 rounded-xl bg-stone-50 px-3 py-3">
-                      <div className="text-xs font-medium tracking-[0.16em] text-stone-400 uppercase">Nhiệm vụ nhập</div>
+                      <div className="text-xs font-medium tracking-[0.16em] text-stone-400 uppercase">Import Job</div>
                       <div className="rounded-lg border border-stone-200 bg-white px-3 py-3">
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-stone-700">
-                              Trạng thái {importJob.status}，Processed {importJob.completed}/{importJob.total}
+                              Status: {importJob.status}, Processed {importJob.completed}/{importJob.total}
                             </div>
                             <div className="truncate text-xs text-stone-400">
-                              Nhiệm vụ {importJob.job_id.slice(0, 8)} · {importJob.created_at}
+                              Job {importJob.job_id.slice(0, 8)} · {importJob.created_at}
                             </div>
                           </div>
                           <Badge
@@ -140,10 +140,10 @@ export function CPAPoolsCard() {
                           <div className="h-full rounded-full bg-stone-900 transition-all" style={{ width: `${progress}%` }} />
                         </div>
                         <div className="mt-2 flex flex-wrap gap-2 text-xs text-stone-500">
-                          <span>Mới {importJob.added}</span>
-                          <span>skip {importJob.skipped}</span>
-                          <span>Refresh {importJob.refreshed}</span>
-                          <span>thất bại {importJob.failed}</span>
+                          <span>Added: {importJob.added}</span>
+                          <span>Skipped: {importJob.skipped}</span>
+                          <span>Refreshed: {importJob.refreshed}</span>
+                          <span>Failed: {importJob.failed}</span>
                         </div>
                       </div>
                     </div>
@@ -155,12 +155,12 @@ export function CPAPoolsCard() {
         )}
 
         <div className="rounded-xl bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-500">
-          <p className="font-medium text-stone-600">Hướng dẫn sử dụng</p>
+          <p className="font-medium text-stone-600">User Guide</p>
           <ul className="mt-1 list-inside list-disc space-y-0.5">
-            <li>Sau khi vào trang, đầu tiên nó sẽ đọc kết nối CPA đã định cấu hình trong hệ thống.</li>
-            <li>Sau khi nhấp vào "Đồng bộ hóa" trên một kết nối nhất định, danh sách accounts từ xa sẽ được đọc trước và hiển thị ở giao diện người dùng để lựa chọn.</li>
-            <li>Sau khi xác nhận lựa chọn, phần phụ trợ sẽ tải xuống access_token tương ứng và nhập nó vào pool accounts cục bộ.</li>
-            <li>Giao diện người dùng chỉ thăm dò tiến trình nhập và không trực tiếp tham gia tải xuống.</li>
+            <li>Upon loading, the page displays all configured CPA connections.</li>
+            <li>Clicking &quot;Sync&quot; queries the remote accounts list and presents it for selection.</li>
+            <li>After confirming selection, the backend downloads the corresponding access tokens and imports them.</li>
+            <li>The frontend polls the import task progress and does not directly download anything.</li>
           </ul>
         </div>
       </CardContent>

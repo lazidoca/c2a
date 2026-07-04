@@ -55,7 +55,7 @@ export function UserKeysCard() {
       const data = await fetchUserKeys();
       setItems(data.items);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không thể tải User Keys");
+      toast.error(error instanceof Error ? error.message : "Failed to load user keys");
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +77,9 @@ export function UserKeysCard() {
       setRevealedKey(data.key);
       setName("");
       setIsDialogOpen(false);
-      toast.success("Đã tạo User Keys");
+      toast.success("User key created");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không tạo được User Keys");
+      toast.error(error instanceof Error ? error.message : "Failed to create user key");
     } finally {
       setIsCreating(false);
     }
@@ -102,7 +102,7 @@ export function UserKeysCard() {
     try {
       const data = await updateUserKey(item.id, { enabled: !item.enabled });
       setItems(data.items);
-      toast.success(item.enabled ? "User keys bị vô hiệu hóa" : "User keys đã được bật");
+      toast.success(item.enabled ? "User key disabled" : "User key enabled");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update user key");
     } finally {
@@ -122,7 +122,7 @@ export function UserKeysCard() {
       setDeletingItem(null);
       toast.success("Deleted User Keys");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Delete User Keys không thành công");
+      toast.error(error instanceof Error ? error.message : "Failed to delete user key");
     } finally {
       setItemPending(item.id, false);
     }
@@ -154,7 +154,7 @@ export function UserKeysCard() {
       setItems(data.items);
       setEditingItem(null);
       setEditKey("");
-      toast.success(trimmedKey ? "Đã cập nhật User Keys" : "Tên người dùng đã được cập nhật");
+      toast.success(trimmedKey ? "User key updated" : "Username updated");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update user key");
     } finally {
@@ -182,12 +182,12 @@ export function UserKeysCard() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold tracking-tight">User Keys</h2>
-                <p className="text-sm text-stone-500">Tạo khóa chuyên dụng cho người dùng thông thường; người dùng thông thường chỉ có thể vào trang bản vẽ và không thể xem cài đặt và pool accounts.</p>
+                <p className="text-sm text-stone-500">Create keys for general users. General users can access drawing canvases but cannot view settings or account pools.</p>
               </div>
             </div>
             <Button className="h-9 rounded-xl bg-stone-950 px-4 text-white hover:bg-stone-800" onClick={() => setIsDialogOpen(true)}>
               <Plus className="size-4" />
-              Tạo User Keys
+              Create User Key
             </Button>
           </div>
 
@@ -203,7 +203,7 @@ export function UserKeysCard() {
                   onClick={() => void handleCopy(revealedKey)}
                 >
                   <Copy className="size-4" />
-                  Sao chép
+                  Copy
                 </Button>
               </div>
             </div>
@@ -227,12 +227,12 @@ export function UserKeysCard() {
                       <div className="flex flex-wrap items-center gap-2">
                         <div className="truncate text-sm font-medium text-stone-800">{item.name}</div>
                         <Badge variant={item.enabled ? "success" : "secondary"} className="rounded-md">
-                          {item.enabled ? "Đã bật" : "Đã tắt"}
+                          {item.enabled ? "Enabled" : "Disabled"}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">
-                        <span>thời gian sáng tạo {formatDateTime(item.created_at)}</span>
-                        <span>Được sử dụng gần đây {formatDateTime(item.last_used_at)}</span>
+                        <span>Created: {formatDateTime(item.created_at)}</span>
+                        <span>Last used: {formatDateTime(item.last_used_at)}</span>
                       </div>
                     </div>
 
@@ -261,7 +261,7 @@ export function UserKeysCard() {
                         ) : (
                           <CheckCircle2 className="size-4" />
                         )}
-                        {item.enabled ? "Disabled" : "kích hoạt"}
+                        {item.enabled ? "Disable" : "Enable"}
                       </Button>
                       <Button
                         type="button"
@@ -285,17 +285,17 @@ export function UserKeysCard() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="rounded-2xl p-6">
           <DialogHeader className="gap-2">
-            <DialogTitle>Tạo User Keys</DialogTitle>
+            <DialogTitle>Create User Key</DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Tùy chọn điền tên nhận xét，Dễ dàng phân biệt giữa những người dùng khác nhau；Sau khi tạo, một khóa gốc sẽ được tạo và chỉ có thể xem được một lần.。
+              Provide an optional name/comment to identify this user. Once created, the raw key is displayed only once.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">tên (tùy chọn)</label>
+            <label className="text-sm font-medium text-stone-700">Name (optional)</label>
             <Input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Ví dụ: Sinh viên thiết kế A, đang vận hành accounts tạm thời"
+              placeholder="e.g. Designer Student A, temporary operational account"
               className="h-11 rounded-xl border-stone-200 bg-white"
             />
           </div>
@@ -316,7 +316,7 @@ export function UserKeysCard() {
               disabled={isCreating}
             >
               {isCreating ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
-              tạo ra
+              Create
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -327,7 +327,7 @@ export function UserKeysCard() {
           <DialogHeader className="gap-2">
             <DialogTitle>Delete User Keys</DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Confirm xóa User Keys「{deletingItem?.name}」?？Sau khi xóa key sẽ không gọi được API nữa.。
+              Are you sure you want to delete User Key &quot;{deletingItem?.name}&quot;? Once deleted, API requests using this key will be rejected.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -366,29 +366,29 @@ export function UserKeysCard() {
           <DialogHeader className="gap-2">
             <DialogTitle>Edit User Keys</DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Tên ghi chú có thể được sửa đổi；Nếu bạn cần thay đổi khóa riêng，Chỉ cần điền khóa gốc mới。Để trống để giữ nguyên khóa hiện tại。
+              You can modify the name. To rotate the API key, specify a new raw value; leave blank to keep current key.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Tên</label>
+              <label className="text-sm font-medium text-stone-700">Name</label>
               <Input
                 value={editName}
                 onChange={(event) => setEditName(event.target.value)}
-                placeholder="Ví dụ: Sinh viên thiết kế A, đang vận hành accounts tạm thời"
+                placeholder="e.g. Designer Student A, temporary operational account"
                 className="h-11 rounded-xl border-stone-200 bg-white"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Khóa riêng mới (tùy chọn)</label>
+              <label className="text-sm font-medium text-stone-700">New Private Key (optional)</label>
               <Input
                 value={editKey}
                 onChange={(event) => setEditKey(event.target.value)}
-                placeholder="Ví dụ: sk-your-custom-user-key"
+                placeholder="e.g. sk-your-custom-user-key"
                 className="h-11 rounded-xl border-stone-200 bg-white font-mono"
               />
               <p className="text-xs leading-5 text-stone-500">
-                Khóa cũ sẽ không hợp lệ ngay sau khi lưu.，Khóa mới có hiệu lực。Hệ thống vẫn chỉ lưu băm，Khóa hiện tại sẽ không được lặp lại。
+                The old key will be invalidated immediately. The system only stores hash values.
               </p>
             </div>
           </div>
@@ -412,7 +412,7 @@ export function UserKeysCard() {
               disabled={editingItem ? pendingIds.has(editingItem.id) : false}
             >
               {editingItem && pendingIds.has(editingItem.id) ? <LoaderCircle className="size-4 animate-spin" /> : <Pencil className="size-4" />}
-              lưu lại
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -34,25 +34,25 @@ export function CPAPoolDialog() {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogContent showCloseButton={false} className="rounded-2xl p-6">
         <DialogHeader className="gap-2">
-          <DialogTitle>{editingPool ? "Edit kết nối" : "Thêm kết nối"}</DialogTitle>
+          <DialogTitle>{editingPool ? "Edit Connection" : "Add Connection"}</DialogTitle>
           <DialogDescription className="text-sm leading-6">
-            {editingPool ? "Sửa đổi thông tin kết nối CPA" : "Thêm kết nối CLIProxyAPI mới"}
+            {editingPool ? "Modify CPA connection details." : "Add a new CLIProxyAPI connection."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">tên (tùy chọn)</label>
+            <label className="text-sm font-medium text-stone-700">Name (optional)</label>
             <Input
               value={formName}
               onChange={(event) => setFormName(event.target.value)}
-              placeholder="Ví dụ: nhóm số chính, nhóm dự phòng"
+              placeholder="E.g., Main Group, Backup Group"
               className="h-11 rounded-xl border-stone-200 bg-white"
             />
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
               <Link2 className="size-3.5" />
-              CPA địa chỉ
+              CPA Address
             </label>
             <Input
               value={formBaseUrl}
@@ -71,7 +71,7 @@ export function CPAPoolDialog() {
                 type={showSecret ? "text" : "password"}
                 value={formSecretKey}
                 onChange={(event) => setFormSecretKey(event.target.value)}
-                placeholder={editingPool ? "Để trống để không sửa key" : "Khóa quản lý CPA"}
+                placeholder={editingPool ? "Leave blank to keep current key" : "CPA Secret Key"}
                 className="h-11 rounded-xl border-stone-200 bg-white pr-10"
               />
               <button
@@ -99,7 +99,7 @@ export function CPAPoolDialog() {
             disabled={isSavingPool}
           >
             {isSavingPool ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-            {editingPool ? "Save thay đổi" : "additional"}
+            {editingPool ? "Save Changes" : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -35,12 +35,12 @@ export function ThirdPartyAppsCard() {
           <div>
             <div className="flex items-center gap-2 text-base font-semibold text-stone-900">
               <ExternalLink className="size-5 text-stone-500" />
-              Mục nhập canvas vô hạn
+              Infinite Canvas Integration
             </div>
-            <p className="mt-1 text-xs leading-6 text-stone-500">Sau khi bật nó, lối vào sẽ được hiển thị ở phần điều hướng trên cùng, địa chỉ dự án và khóa hiện tại sẽ tự động được đính kèm khi nhảy.</p>
+            <p className="mt-1 text-xs leading-6 text-stone-500">Once enabled, an entry link will appear in the top navigation. Project address and active keys will be automatically appended upon redirection.</p>
           </div>
           <span className={`rounded-full px-3 py-1 text-xs ${canvas.enabled ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-            {canvas.enabled ? "Đã bật" : "Chưa bật"}
+            {canvas.enabled ? "Enabled" : "Disabled"}
           </span>
         </div>
 
@@ -50,10 +50,10 @@ export function ThirdPartyAppsCard() {
               checked={Boolean(canvas.enabled)}
               onCheckedChange={(checked) => setInfiniteCanvasField("enabled", Boolean(checked))}
             />
-            Bật canvas vô hạn
+            Enable Infinite Canvas
           </label>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Địa chỉ canvas không giới hạn</label>
+            <label className="text-sm text-stone-700">Infinite Canvas URL</label>
             <Input
               value={canvas.url}
               onChange={(event) => setInfiniteCanvasField("url", event.target.value)}
@@ -61,10 +61,10 @@ export function ThirdPartyAppsCard() {
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
             <p className="text-xs leading-5 text-stone-500">
-              Nó sẽ được additional vào khi lối vào trên cùng nhảy apiKey và baseUrl thông số；Điều hướng trên cùng không hiển thị canvas vô hạn sau khi đóng。
+              Redirection automatically appends apiKey and baseUrl parameters. Disabling this removes Infinite Canvas from the top navigation.
             </p>
             <p className="text-xs leading-5 text-amber-700">
-              Lối vào này chỉ dành cho thử nghiệm cá nhân；Để sử dụng lâu dài, bạn nên tự mình triển khai canvas không giới hạn tại địa phương.。
+              This integration is intended for personal testing. For production, please deploy Infinite Canvas locally.
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@ export function ThirdPartyAppsCard() {
         <div className="flex justify-end">
           <Button className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800" onClick={() => void saveConfig()} disabled={isSavingConfig}>
             {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-            lưu lại
+            Save Configuration
           </Button>
         </div>
       </CardContent>

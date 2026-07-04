@@ -20,8 +20,8 @@ const adminNavItems = [
   { href: "/register", label: "Keygen" },
   { href: "/image-manager", label: "Image Manager" },
   { href: "/logs", label: "Log Manager" },
-  { href: "/debug", label: "Gỡ lỗi" },
-  { href: "/settings", label: "cài đặt" },
+  { href: "/debug", label: "Debug" },
+  { href: "/settings", label: "Settings" },
 ];
 
 const userNavItems: Array<{ href: string; label: string }> = [];
@@ -108,7 +108,7 @@ export function TopNav() {
   }
 
   const navItems = session.role === "admin" ? adminNavItems : userNavItems;
-  const roleLabel = session.role === "admin" ? "Quản trị viên" : "User thông thường";
+  const roleLabel = session.role === "admin" ? "Administrator" : "Regular User";
   const displayName = session.name.trim() || roleLabel;
   const baseUrl = webConfig.apiUrl.replace(/\/$/, "") || window.location.origin;
   const canvas = thirdPartyApps?.infinite_canvas;

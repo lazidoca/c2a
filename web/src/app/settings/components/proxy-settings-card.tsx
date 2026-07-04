@@ -37,7 +37,7 @@ export function ProxySettingsCard() {
       if (data.result.ok) {
         toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "unknown error"}`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Proxy test failed");
@@ -55,12 +55,12 @@ export function ProxySettingsCard() {
               <Link2 className="size-5 text-stone-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">proxy toàn cầu</h2>
-              <p className="text-sm text-stone-500">Định cấu hình proxy hợp nhất cho các yêu cầu gửi đi trong hệ thống, thao tác này sẽ có hiệu lực ngay sau khi lưu.</p>
+              <h2 className="text-lg font-semibold tracking-tight">Global Proxy</h2>
+              <p className="text-sm text-stone-500">Configure a unified proxy for outgoing requests in the system. Changes take effect immediately upon saving.</p>
             </div>
           </div>
           <Badge variant={proxy.trim() ? "success" : "secondary"} className="w-fit rounded-md px-2.5 py-1">
-            {proxy.trim() ? "được cấu hình" : "Chưa được định cấu hình"}
+            {proxy.trim() ? "Configured" : "Not Configured"}
           </Badge>
         </div>
 
@@ -71,7 +71,7 @@ export function ProxySettingsCard() {
         ) : (
           <>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">địa chỉ proxy</label>
+              <label className="text-sm font-medium text-stone-700">Proxy Address</label>
               <Input
                 value={proxy}
                 onChange={(event) => {
@@ -82,7 +82,7 @@ export function ProxySettingsCard() {
                 className="h-11 rounded-xl border-stone-200 bg-white"
               />
               <p className="text-sm text-stone-500">
-                Để trống để không sử dụng proxy。Vui lòng điền địa chỉ đầy đủ，Ví dụ `http://127.0.0.1:7890`、`http://tên người dùng:password@127.0.0.1:7890` hoặc `socks5://127.0.0.1:7890`。
+                Leave blank to disable proxy. Please specify a complete URL, e.g., `http://127.0.0.1:7890`, `http://username:password@127.0.0.1:7890`, or `socks5://127.0.0.1:7890`.
               </p>
             </div>
 
@@ -95,8 +95,8 @@ export function ProxySettingsCard() {
                 }`}
               >
                 {testResult.ok
-                  ? `Proxy khả dụng: HTTP ${testResult.status}, thời gian ${testResult.latency_ms} ms`
-                  : `Proxy unavailable: ${testResult.error ?? "lỗi không xác định"}（thời gian ${testResult.latency_ms} ms）`}
+                  ? `Proxy available: HTTP ${testResult.status}, latency ${testResult.latency_ms} ms`
+                  : `Proxy unavailable: ${testResult.error ?? "unknown error"} (latency ${testResult.latency_ms} ms)`}
               </div>
             ) : null}
 
@@ -108,7 +108,7 @@ export function ProxySettingsCard() {
                 disabled={isTesting || isLoadingConfig}
               >
                 {isTesting ? <LoaderCircle className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
-                chất thử nghiệm
+                Test Connection
               </Button>
               <Button
                 className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800"
@@ -116,7 +116,7 @@ export function ProxySettingsCard() {
                 disabled={isSavingConfig}
               >
                 {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Save cấu hình
+                Save Configuration
               </Button>
             </div>
           </>

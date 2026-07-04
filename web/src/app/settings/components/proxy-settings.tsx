@@ -38,7 +38,7 @@ export function ProxySettingsCard() {
       setFormUrl(data.proxy.url);
       setFormEnabled(data.proxy.enabled);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không tải được cấu hình proxy");
+      toast.error(error instanceof Error ? error.message : "Failed to load proxy configuration");
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +58,7 @@ export function ProxySettingsCard() {
 
   const handleSave = async () => {
     if (formEnabled && !formUrl.trim()) {
-      toast.error("Proxy address phải được điền khi kích hoạt proxy");
+      toast.error("Proxy address must be specified when enabling proxy");
       return;
     }
     setIsSaving(true);
@@ -72,7 +72,7 @@ export function ProxySettingsCard() {
       setFormEnabled(data.proxy.enabled);
       toast.success("Config saved proxy");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Save không thành công");
+      toast.error(error instanceof Error ? error.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -92,7 +92,7 @@ export function ProxySettingsCard() {
       if (data.result.ok) {
         toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "unknown error"}`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Proxy test failed");
@@ -110,9 +110,9 @@ export function ProxySettingsCard() {
               <Wifi className="size-5 text-stone-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Cấu hình proxy upstream</h2>
+              <h2 className="text-lg font-semibold tracking-tight">Upstream Proxy Configuration</h2>
               <p className="text-sm text-stone-500">
-                cho chatgpt.com Yêu cầu định cấu hình proxy gửi đi，Thích hợp triển khai server trong nước；Sub2API / CPA Yêu cầu không bị ảnh hưởng。
+                Configure an outgoing proxy for chatgpt.com requests; useful for server deployments in restricted network environments. Sub2API / CPA requests are unaffected.
               </p>
             </div>
           </div>
@@ -132,9 +132,9 @@ export function ProxySettingsCard() {
                 onChange={(event) => setFormEnabled(event.target.checked)}
               />
               <div className="space-y-0.5">
-                <div className="text-sm font-medium text-stone-800">Bật proxy</div>
+                <div className="text-sm font-medium text-stone-800">Enable Proxy</div>
                 <div className="text-sm text-stone-500">
-                  Sau khi đóng cửa chatgpt.com Các yêu cầu sẽ được chuyển tới。Có hiệu lực ngay sau khi lưu，Không cần phải khởi động lại。
+                  All chatgpt.com requests will be routed through this proxy. Takes effect immediately upon saving without restarting.
                 </div>
               </div>
             </label>
@@ -142,16 +142,16 @@ export function ProxySettingsCard() {
             <div className="space-y-2">
               <label className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
                 <PlugZap className="size-3.5" />
-                địa chỉ proxy
+                Proxy Address
               </label>
               <Input
                 value={formUrl}
                 onChange={(event) => setFormUrl(event.target.value)}
-                placeholder="http://user:pass@host:port hoặc socks5://host:port"
+                placeholder="http://user:pass@host:port or socks5://host:port"
                 className="h-11 rounded-xl border-stone-200 bg-white font-mono text-xs"
               />
               <div className="text-xs text-stone-400">
-                hỗ trợ <code className="font-mono">http / https / socks4 / socks5 / socks5h</code>。
+                Supports <code className="font-mono">http / https / socks4 / socks5 / socks5h</code>.
               </div>
             </div>
 
@@ -165,10 +165,10 @@ export function ProxySettingsCard() {
               >
                 {testResult.ok ? (
                   <>
-                    proxy có sẵn：HTTP {testResult.status}，thời gian {testResult.latency_ms} ms
+                    Proxy available: HTTP {testResult.status}, latency {testResult.latency_ms} ms
                   </>
                 ) : (
-                  <>Proxy unavailable: {testResult.error ?? "lỗi không xác định"}（thời gian {testResult.latency_ms} ms）</>
+                  <>Proxy unavailable: {testResult.error ?? "unknown error"} (latency {testResult.latency_ms} ms)</>
                 )}
               </div>
             ) : null}
@@ -180,7 +180,7 @@ export function ProxySettingsCard() {
                 disabled={isSaving || !dirty}
               >
                 {isSaving ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-                lưu lại
+                Save
               </Button>
               <Button
                 variant="outline"
@@ -189,7 +189,7 @@ export function ProxySettingsCard() {
                 disabled={isTesting}
               >
                 {isTesting ? <LoaderCircle className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
-                Kiểm tra kết nối
+                Test Connection
               </Button>
             </div>
           </div>

@@ -143,7 +143,7 @@ function readFileAsText(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
-    reader.onerror = () => reject(reader.error ?? new Error(`Không đọc được tệp: ${file.name}`));
+    reader.onerror = () => reject(reader.error ?? new Error(`Failed to read file: ${file.name}`));
     reader.readAsText(file);
   });
 }
@@ -222,7 +222,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
     const normalizedtokenss = tokens.map((item) => item.trim()).filter(Boolean);
 
     if (normalizedtokenss.length === 0) {
-      toast.error("Trước tiên, vui lòng cung cấp ít nhất một tokens có sẵn");
+      toast.error("Please provide at least one access token first");
       return;
     }
 
@@ -236,15 +236,15 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       if ((data.errors?.length ?? 0) > 0) {
         const firstError = data.errors?.[0]?.error;
         toast.error(
-          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，Đã làm mới ${data.refreshed ?? 0} một，thất bại ${data.errors?.length ?? 0} một${firstError ? `, first error: ${firstError}` : ""}`,
+          `${successText ?? "Import completed"}: Added ${data.added ?? 0}, Refreshed ${data.refreshed ?? 0}, Failed ${data.errors?.length ?? 0}${firstError ? `, first error: ${firstError}` : ""}`,
         );
       } else {
         toast.success(
-          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，skip ${data.skipped ?? 0} trùng lặp，Thông tin accounts đã được tự động làm mới`,
+          `${successText ?? "Import completed"}: Added ${data.added ?? 0}, Skipped ${data.skipped ?? 0} duplicates. Account details refreshed automatically.`,
         );
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không thể nhập accounts";
+      const message = error instanceof Error ? error.message : "Failed to import accounts";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -252,10 +252,10 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
   };
 
   const handleImporttokensText = async () => {
-    await submittokenss(splittokenss(tokenInput), "Đã hoàn tất nhập token truy cập");
+    await submittokenss(splittokenss(tokenInput), "Access token import completed");
   };
 
-  // Từ ủy quyền：lấy authorize URL，Mở ngay trong cửa sổ mới，Thuận tiện cho người dùng đăng nhập
+  // Start OAuth: get authorize URL, open in a new window for user login
   const handleStartOAuth = async () => {
     setOauthStarting(true);
     try {
@@ -265,24 +265,24 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       if (typeof window !== "undefined") {
         window.open(data.authorize_url, "_blank", "noopener,noreferrer");
       }
-      toast.success("Trang ủy quyền OpenAI đã được mở. Vui lòng sao chép lại URL gọi lại sau khi đăng nhập.");
+      toast.success("OpenAI authorization page opened. Please copy the callback URL after logging in.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Khởi tạo OAuth không thành công";
+      const message = error instanceof Error ? error.message : "OAuth initialization failed";
       toast.error(message);
     } finally {
       setOauthStarting(false);
     }
   };
 
-  // dán lại callback URL Done trao đổi token + Đặt hàng
+  // Finish OAuth: paste callback URL to exchange token and create/update accounts
   const handleFinishOAuth = async () => {
     if (!oauthSession) {
-      toast.error("Vui lòng nhấp vào trước\"Open authorization page\"Nhận phiên");
+      toast.error("Please click \"Open authorization page\" first to start session");
       return;
     }
     const trimmed = oauthCallbackInput.trim();
     if (!trimmed) {
-      toast.error("Vui lòng dán URL hoặc mã gọi lại");
+      toast.error("Please paste the callback URL or code");
       return;
     }
 
@@ -296,22 +296,22 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       if ((data.errors?.length ?? 0) > 0) {
         const firstError = data.errors?.[0]?.error;
         toast.error(
-          `Login OAuth đã hoàn tất, ${data.added ?? 0} mới, ${data.refreshed ?? 0} được làm mới, không thành công ${data.errors?.length ?? 0} ${firstError? `, first error: ${firstError}` : ""}`,
+          `OAuth login completed: ${data.added ?? 0} new, ${data.refreshed ?? 0} refreshed, ${data.errors?.length ?? 0} failed${firstError ? `, first error: ${firstError}` : ""}`,
         );
       } else {
         toast.success(
-          `Login OAuth đã hoàn tất, ${data.added ?? 0} đã additional, ${data.skipped ?? 0} bản sao bị skip, thông tin accounts đã được tự động làm mới`,
+          `OAuth login completed: ${data.added ?? 0} added, ${data.skipped ?? 0} duplicates skipped. Account details refreshed automatically.`,
         );
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Thay thế token OAuth không thành công";
+      const message = error instanceof Error ? error.message : "OAuth token exchange failed";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Sao chép authorize URL vào khay nhớ tạm（Thích ứng với trình duyệt và fallback）
+  // Copy authorize URL to clipboard (with fallback support)
   const handleCopyAuthorizeUrl = async () => {
     if (!oauthSession) {
       return;
@@ -319,12 +319,12 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(oauthSession.authorize_url);
-        toast.success("Đã sao chép URL ủy quyền vào bảng nhớ tạm");
+        toast.success("Authorization URL copied to clipboard");
       } else {
-        toast.error("Môi trường hiện tại không hỗ trợ sao chép tự động, vui lòng chọn và sao chép thủ công.");
+        toast.error("Auto-copy not supported. Please select and copy manually.");
       }
     } catch {
-      toast.error("Sao chép không thành công, vui lòng chọn và sao chép thủ công");
+      toast.error("Copy failed. Please select and copy manually");
     }
   };
 
@@ -341,7 +341,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       const tokens = splittokenss(content);
 
       if (tokens.length === 0) {
-        toast.error("Không có tokens hợp lệ nào được đọc trong tệp TXT.");
+        toast.error("No valid access tokens found in the TXT file.");
         return;
       }
 
@@ -349,16 +349,16 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
         const next = [...splittokenss(prev), ...tokens];
         return next.join("\n");
       });
-      toast.success(`Đọc token ${file.name} từ ${tokens.length}`);
+      toast.success(`Loaded ${tokens.length} access tokens from ${file.name}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không đọc được tệp TXT";
+      const message = error instanceof Error ? error.message : "Failed to read TXT file";
       toast.error(message);
     }
   };
 
   const handleImportSessionJson = async () => {
     if (!sessionInput.trim()) {
-      toast.error("Trước tiên, vui lòng dán JSON phiên hoàn chỉnh");
+      toast.error("Please paste the complete session JSON first");
       return;
     }
 
@@ -367,20 +367,20 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       const token = getSessionAccesstokens(payload);
 
       if (!token) {
-        toast.error("accesstokens không được trích xuất từ JSON phiên");
+        toast.error("No access tokens extracted from session JSON");
         return;
       }
 
-      await submittokenss([token], "Quá trình nhập JSON của phiên đã hoàn tất");
+      await submittokenss([token], "Session JSON import completed");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Phân tích cú pháp JSON của phiên không thành công";
+      const message = error instanceof Error ? error.message : "Failed to parse session JSON";
       toast.error(message);
     }
   };
 
   const handleImportCodexAuthJson = async () => {
     if (!codexAuthInput.trim()) {
-      toast.error("Trước tiên hãy dán JSON xác thực Codex");
+      toast.error("Please paste the Codex auth JSON first");
       return;
     }
 
@@ -389,13 +389,13 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       const account = getCodexAuthAccount(payload);
 
       if (!account) {
-        toast.error("access_token không được trích xuất từ JSON xác thực Codex");
+        toast.error("No access_token extracted from Codex auth JSON");
         return;
       }
 
-      await submittokenss([account.access_token], "Đã hoàn tất quá trình nhập JSON xác thực Codex", [account]);
+      await submittokenss([account.access_token], "Codex auth JSON import completed", [account]);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Xác thực Codex Phân tích cú pháp JSON không thành công";
+      const message = error instanceof Error ? error.message : "Failed to parse Codex auth JSON";
       toast.error(message);
     }
   };

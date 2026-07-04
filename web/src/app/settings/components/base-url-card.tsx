@@ -27,12 +27,12 @@ export function BaseUrlCard() {
               <Globe className="size-5 text-stone-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">địa chỉ cơ sở</h2>
-              <p className="text-sm text-stone-500">Đặt giá trị cấu hình cục bộ của `CHATGPT2API_BASE_URL`, giá trị này sẽ có hiệu lực ngay sau khi lưu.</p>
+              <h2 className="text-lg font-semibold tracking-tight">Base URL</h2>
+              <p className="text-sm text-stone-500">Set the local configuration value for `CHATGPT2API_BASE_URL`. It takes effect immediately upon saving.</p>
             </div>
           </div>
           <Badge variant={baseUrl.trim() ? "success" : "secondary"} className="w-fit rounded-md px-2.5 py-1">
-            {baseUrl.trim() ? "được cấu hình" : "Chưa được định cấu hình"}
+            {baseUrl.trim() ? "Configured" : "Not Configured"}
           </Badge>
         </div>
 
@@ -50,7 +50,7 @@ export function BaseUrlCard() {
                 placeholder="https://example.com"
                 className="h-11 rounded-xl border-stone-200 bg-white"
               />
-              <p className="text-sm text-stone-500">Nếu để trống, các biến môi trường hoặc giá trị mặc định sẽ được sử dụng và các khoảng trắng ở đầu và cuối sẽ tự động bị xóa khi lưu.</p>
+              <p className="text-sm text-stone-500">If left blank, environment variables or default values will be used. Leading and trailing spaces are trimmed automatically.</p>
             </div>
 
             <div className="flex justify-end">
@@ -60,7 +60,7 @@ export function BaseUrlCard() {
                 disabled={isSavingConfig}
               >
                 {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Save cấu hình
+                Save Configuration
               </Button>
             </div>
           </>

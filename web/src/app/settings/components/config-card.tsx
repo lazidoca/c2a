@@ -60,7 +60,7 @@ export function ConfigCard() {
       if (data.result.ok) {
         toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "unknown error"}`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Proxy test failed");
@@ -83,21 +83,21 @@ export function ConfigCard() {
     <Card className="rounded-2xl border-white/80 bg-white/90 shadow-sm">
       <CardContent className="space-y-4 p-6">
         <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-600">
-          Khóa đăng nhập quản trị viên tiếp tục được đọc từ cấu hình triển khai，Không hiển thị trên trang này nữa；Để phân phát cho người khác，Vui lòng tạo User Keys Normal bên dưới。
+          The admin login key is loaded from deployment configuration and is no longer displayed here. To grant access to others, please create standard User Keys below.
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Khoảng thời gian làm mới accounts</label>
+            <label className="text-sm text-stone-700">Account Refresh Interval</label>
             <Input
               value={String(config?.refresh_account_interval_minute || "")}
               onChange={(event) => setRefreshAccountIntervalMinute(event.target.value)}
-              placeholder="phút"
+              placeholder="minutes"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Trong vài phút, kiểm soát tần suất làm mới tự động của accounts.</p>
+            <p className="text-xs text-stone-500">In minutes; controls the frequency of automatic account refreshes.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">proxy toàn cầu</label>
+            <label className="text-sm text-stone-700">Global Proxy</label>
             <Input
               value={String(config?.proxy || "")}
               onChange={(event) => {
@@ -108,7 +108,7 @@ export function ConfigCard() {
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
             <p className="text-xs leading-5 text-stone-500">
-              Để trống để không sử dụng proxy。Thỏa thuận hỗ trợ://accounts:Mật khẩu@Máy chủ:hải cảng，Bạn cũng có thể dán trực tiếp proxy Máy chủ:hải cảng:accounts:Mật khẩu；Ví dụ http://user:pass@127.0.0.1:7890、127.0.0.1:7890:user:pass。Mật khẩu accounts bao gồm @/: Bắt buộc khi chờ ký tự đặc biệt URL mã hóa。
+              Leave blank to bypass proxies. Supported protocols: http/socks5. Example: http://user:pass@127.0.0.1:7890 or 127.0.0.1:7890:user:pass. Account passwords containing special characters (e.g., @, /, :) must be URL encoded.
             </p>
             {proxyTestResult ? (
               <div
@@ -119,8 +119,8 @@ export function ConfigCard() {
                 }`}
               >
                 {proxyTestResult.ok
-                  ? `Proxy khả dụng: HTTP ${proxyTestResult.status}, thời gian ${proxyTestResult.latency_ms} ms`
-                  : `Proxy unavailable: ${proxyTestResult.error ?? "lỗi không xác định"}（thời gian ${proxyTestResult.latency_ms} ms）`}
+                  ? `Proxy available: HTTP ${proxyTestResult.status}, latency ${proxyTestResult.latency_ms} ms`
+                  : `Proxy unavailable: ${proxyTestResult.error ?? "unknown error"} (latency ${proxyTestResult.latency_ms} ms)`}
               </div>
             ) : null}
             <div className="flex justify-end">
@@ -132,49 +132,49 @@ export function ConfigCard() {
                 disabled={isTestingProxy}
               >
                 {isTestingProxy ? <LoaderCircle className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
-                chất thử nghiệm
+                Test Proxy
               </Button>
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Địa chỉ truy cập hình ảnh</label>
+            <label className="text-sm text-stone-700">Image Access Address</label>
             <Input
               value={String(config?.base_url || "")}
               onChange={(event) => setBaseUrl(event.target.value)}
               placeholder="https://example.com"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Địa chỉ tiền tố truy cập được sử dụng để tạo kết quả hình ảnh.</p>
+            <p className="text-xs text-stone-500">Prefix URL used for accessing generated images.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Tự động làm sạch hình ảnh</label>
+            <label className="text-sm text-stone-700">Auto Clean Images</label>
             <Input
               value={String(config?.image_retention_days || "")}
               onChange={(event) => setImageRetentionDays(event.target.value)}
               placeholder="30"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Tự động xóa hình ảnh cục bộ từ bao nhiêu ngày trước.</p>
+            <p className="text-xs text-stone-500">Automatically delete local images older than this number of days.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Hết thời gian bỏ phiếu hình ảnh</label>
+            <label className="text-sm text-stone-700">Image Polling Timeout</label>
             <Input
               value={String(config?.image_poll_timeout_secs || "")}
               onChange={(event) => setImagePollTimeoutSecs(event.target.value)}
               placeholder="120"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Tính bằng giây, thời gian tối đa để chờ kết quả hình ảnh upstream.</p>
+            <p className="text-xs text-stone-500">In seconds; maximum time to wait for upstream image completion.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Đồng thời hình ảnh một accounts</label>
+            <label className="text-sm text-stone-700">Single Account Image Concurrency</label>
             <Input
               value={String(config?.image_account_concurrency || "")}
               onChange={(event) => setImageAccountConcurrency(event.target.value)}
               placeholder="1"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Giới hạn số lượng yêu cầu hình ảnh được mỗi accounts xử lý cùng lúc, mặc định là 3.</p>
+            <p className="text-xs text-stone-500">Limits the number of concurrent image generation requests processed by each account, defaults to 3.</p>
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
@@ -182,9 +182,9 @@ export function ConfigCard() {
                 checked={Boolean(config?.auto_remove_invalid_accounts)}
                 onCheckedChange={(checked) => setAutoRemoveInvalidAccounts(Boolean(checked))}
               />
-              Tự động loại bỏ các accounts Abnormal
+              Automatically remove invalid accounts
             </label>
-            <p className="text-xs text-stone-500">Phát hiện và loại bỏ khi làm mới</p>
+            <p className="text-xs text-stone-500">Detect and remove during refresh.</p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
@@ -192,9 +192,9 @@ export function ConfigCard() {
                 checked={Boolean(config?.image_settle_enabled !== false)}
                 onCheckedChange={(checked) => setImageSettleEnabled(Boolean(checked))}
               />
-              <span className="text-sm text-stone-700">Cơ chế xác nhận thứ cấp hình ảnh</span>
+              <span className="text-sm text-stone-700">Image Settle Mechanism</span>
             </div>
-            <p className="text-xs text-stone-500">Sau khi mở nó, tỷ lệ lấy được hình ảnh thành công có thể được cải thiện đôi chút.</p>
+            <p className="text-xs text-stone-500">When enabled, the image success rate can be slightly improved.</p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
@@ -202,22 +202,22 @@ export function ConfigCard() {
                 checked={Boolean(config?.image_remove_conversation_after_result)}
                 onCheckedChange={(checked) => setImageRemoveConversationAfterResult(Boolean(checked))}
               />
-              <span className="text-sm text-stone-700">Loại bỏ hội thoại cục bộ sau khi xuất hình ảnh</span>
+              <span className="text-sm text-stone-700">Delete local ChatGPT conversation after image output</span>
             </div>
-            <p className="text-xs text-stone-500">Sau khi lấy được hình ảnh thành công, tự động ẩn cuộc hội thoại tương ứng trên ChatGPT ở chế độ bất đồng bộ.</p>
+            <p className="text-xs text-stone-500">After successfully retrieving the image, automatically hide the corresponding conversation on ChatGPT asynchronously.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Time chờ hình ảnh tiếp tục thời gian chờ đợi</label>
+            <label className="text-sm text-stone-700">Image Timeout Retry Duration</label>
             <Input
               value={String(config?.image_timeout_retry_secs || "30")}
               onChange={(event) => setImageTimeoutRetrySecs(event.target.value)}
               placeholder="30"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Đơn vị là giây, thời gian chờ bổ sung sau khi nhấp vào &quot;Tiếp tục chờ&quot; sau khi hết thời gian chờ.</p>
+            <p className="text-xs text-stone-500">In seconds; additional wait time after clicking &quot;Continue Waiting&quot; upon timeout.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Hình ảnh thời gian chờ xác nhận thứ cấp</label>
+            <label className="text-sm text-stone-700">Image Settle Timeout</label>
             <Input
               value={String(config?.image_settle_secs || "2.0")}
               onChange={(event) => setImageSettleSecs(event.target.value)}
@@ -225,7 +225,7 @@ export function ConfigCard() {
               className="h-10 rounded-xl border-stone-200 bg-white disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!config?.image_settle_enabled}
             />
-            <p className="text-xs text-stone-500">Tính bằng giây, phải đợi bao lâu để xác nhận lại sau khi tìm thấy ảnh. Nó cần được sử dụng cùng với cơ chế xác nhận thứ cấp hình ảnh.</p>
+            <p className="text-xs text-stone-500">In seconds; how long to wait for validation after finding an image. Requires Image Settle Mechanism to be active.</p>
           </div>
           <div className="flex gap-4 md:col-span-2">
             <div className="flex-1 space-y-2">
@@ -234,9 +234,9 @@ export function ConfigCard() {
                   checked={Boolean(config?.auto_relogin_after_refresh)}
                   onCheckedChange={(checked) => setAutoReloginAfterRefresh(Boolean(checked))}
                 />
-                Tự động cố gắng loại bỏ trạng thái Abnormal sau khi làm mới
+                Auto attempt to resolve invalid status after refresh
               </label>
-              <p className="text-xs text-stone-500">Tự động thử mật khẩu để đăng nhập và khôi phục accounts khi làm mới sau khi bật.</p>
+              <p className="text-xs text-stone-500">Automatically attempt to login and restore accounts during refresh when enabled.</p>
             </div>
             <div className="flex-1" aria-hidden="true" />
           </div>
@@ -245,12 +245,12 @@ export function ConfigCard() {
               checked={Boolean(config?.auto_remove_rate_limited_accounts)}
               onCheckedChange={(checked) => setAutoRemoveRateLimitedAccounts(Boolean(checked))}
             />
-            Tự động xóa accounts bị giới hạn hiện tại
+            Automatically remove currently rate-limited accounts
           </label>
           <div className="space-y-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
             <div>
-              <label className="text-sm text-stone-700">Cấp độ nhật ký bảng điều khiển</label>
-              <p className="mt-1 text-xs text-stone-500">Sử dụng thông tin/cảnh báo/lỗi mặc định khi không được chọn.</p>
+              <label className="text-sm text-stone-700">Console Log Level</label>
+              <p className="mt-1 text-xs text-stone-500">Uses info/warning/error by default when none are selected.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {logLevelOptions.map((level) => (
@@ -265,24 +265,24 @@ export function ConfigCard() {
             </div>
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm text-stone-700">Chỉ thị bổ sung toàn cầu</label>
+            <label className="text-sm text-stone-700">Global System Prompt</label>
             <Textarea
               value={String(config?.global_system_prompt || "")}
               onChange={(event) => setGlobalSystemPrompt(event.target.value)}
-              placeholder="Ví dụ: trước tiên hãy xác định xem lời nhắc của người dùng có tuân thủ hay không; từ chối trả lời khi gặp các yêu cầu trái pháp luật, khiêu dâm, bạo lực, hận thù, v.v."
+              placeholder="E.g., Determine whether the user prompt complies with terms; refuse to answer illegal, pornographic, violent, hateful, or abusive prompts."
               className="min-h-28 rounded-xl border-stone-200 bg-white font-mono text-xs shadow-none"
             />
-            <p className="text-xs text-stone-500">Mỗi yêu cầu được đưa vào dưới dạng một thông báo hệ thống, có thể được sử dụng để xem xét lời nhắc của người dùng, tránh nội dung bất hợp pháp, hạn chế thống nhất hành vi của mô hình hoặc sửa các cài đặt vai trò.</p>
+            <p className="text-xs text-stone-500">Appended to every request as a system message. Can be used for prompt filtering, safety guardrails, restricting behavior, or fixing role settings.</p>
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm text-stone-700">từ ngữ nhạy cảm</label>
+            <label className="text-sm text-stone-700">Sensitive Words</label>
             <Textarea
               value={(config?.sensitive_words || []).join("\n")}
               onChange={(event) => setSensitiveWordsText(event.target.value)}
-              placeholder="Một dòng trên mỗi dòng, nhấn và từ chối"
+              placeholder="One word per line; requests containing these will be rejected immediately"
               className="min-h-28 rounded-xl border-stone-200 bg-white font-mono text-xs shadow-none"
             />
-            <p className="text-xs text-stone-500">Miễn là yêu cầu của người dùng có chứa bất kỳ từ nhạy cảm nào thì lời từ chối sẽ được trả lại trực tiếp.</p>
+            <p className="text-xs text-stone-500">If the request contains any of these words, it will be rejected directly.</p>
           </div>
           <div className="space-y-4 rounded-xl border border-stone-200 bg-white px-4 py-3 md:col-span-2">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -291,7 +291,7 @@ export function ConfigCard() {
                   checked={Boolean(config?.image_storage?.enabled)}
                   onCheckedChange={(checked) => setImageStorageField("enabled", Boolean(checked))}
                 />
-                kích hoạt WebDAV Save trữ hình ảnh
+                Enable WebDAV Image Storage
               </label>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -302,7 +302,7 @@ export function ConfigCard() {
                   disabled={isTestingImageStorage || !config?.image_storage?.enabled}
                 >
                   {isTestingImageStorage ? <LoaderCircle className="size-4 animate-spin" /> : <Cloud className="size-4" />}
-                  kiểm tra WebDAV
+                  Test WebDAV
                 </Button>
                 <Button
                   type="button"
@@ -312,29 +312,29 @@ export function ConfigCard() {
                   disabled={isSyncingImageStorage || !config?.image_storage?.enabled || config?.image_storage?.mode === "local"}
                 >
                   {isSyncingImageStorage ? <LoaderCircle className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-                  Đồng bộ hóa hoàn toàn
+                  Full Sync
                 </Button>
               </div>
             </div>
             <p className="text-xs leading-6 text-stone-500">
-              Chỉ xử lý hình ảnh mới này khi tạo；Đồng bộ hóa hoàn toàn được sử dụng để bổ sung các hình ảnh cục bộ hiện có vào WebDAV。
+              Only new images are uploaded automatically. Full Sync uploads existing local images to WebDAV.
             </p>
             <div className="rounded-lg border border-stone-100 bg-stone-50 px-3 py-2 text-xs text-stone-600">
-              Chế độ hiện tại sẽ được lưu：
+              Current Storage Mode:
               <span className="ml-1 font-medium text-stone-900">
                 {config?.image_storage?.enabled
                   ? config.image_storage.mode === "both"
-                    ? "Bản địa + WebDAV"
+                    ? "Local + WebDAV"
                     : config.image_storage.mode === "webdav"
-                      ? "Chỉ WebDAV"
-                      : "Máy này chỉ"
-                  : "Máy này chỉ"}
+                      ? "Only WebDAV"
+                      : "Only Local"
+                  : "Only Local"}
               </span>
-              <span className="ml-2 text-stone-400">Sau khi sửa đổi, bạn cần nhấp vào Save hoặc lưu tự động thông qua nút Kiểm tra/Đồng bộ hóa.</span>
+              <span className="ml-2 text-stone-400">After modifying, you need to click Save or save automatically through the Test/Sync buttons.</span>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <label className="text-sm text-stone-700">chế độ lưu</label>
+                <label className="text-sm text-stone-700">Storage Mode</label>
                 <Select
                   value={String(config?.image_storage?.mode || "local")}
                   onValueChange={(value) => setImageStorageField("mode", value as ImageStorageMode)}
@@ -344,9 +344,9 @@ export function ConfigCard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="local">Máy này chỉ</SelectItem>
-                    <SelectItem value="webdav">Chỉ WebDAV</SelectItem>
-                    <SelectItem value="both">Bản địa + WebDAV</SelectItem>
+                    <SelectItem value="local">Only Local</SelectItem>
+                    <SelectItem value="webdav">Only WebDAV</SelectItem>
+                    <SelectItem value="both">Local + WebDAV</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -361,7 +361,7 @@ export function ConfigCard() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-stone-700">Tên người dùng</label>
+                <label className="text-sm text-stone-700">Username</label>
                 <Input
                   value={String(config?.image_storage?.webdav_username || "")}
                   onChange={(event) => setImageStorageField("webdav_username", event.target.value)}
@@ -370,7 +370,7 @@ export function ConfigCard() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-stone-700">Mật khẩu</label>
+                <label className="text-sm text-stone-700">Password</label>
                 <Input
                   type="password"
                   value={String(config?.image_storage?.webdav_password || "")}
@@ -380,7 +380,7 @@ export function ConfigCard() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-stone-700">thư mục từ xa</label>
+                <label className="text-sm text-stone-700">Remote Directory</label>
                 <Input
                   value={String(config?.image_storage?.webdav_root_path || "")}
                   onChange={(event) => setImageStorageField("webdav_root_path", event.target.value)}
@@ -390,7 +390,7 @@ export function ConfigCard() {
                 />
               </div>
               <div className="space-y-2 md:col-span-3">
-                <label className="text-sm text-stone-700">tiền tố truy cập công cộng</label>
+                <label className="text-sm text-stone-700">Public Access Prefix</label>
                 <Input
                   value={String(config?.image_storage?.public_base_url || "")}
                   onChange={(event) => setImageStorageField("public_base_url", event.target.value)}
@@ -398,7 +398,7 @@ export function ConfigCard() {
                   className="h-10 rounded-xl border-stone-200 bg-white"
                   disabled={!config?.image_storage?.enabled}
                 />
-                <p className="text-xs text-stone-500">Nếu để trống, nó sẽ trở về địa chỉ proxy /images/... của ứng dụng này; sau khi điền vào, nó sẽ trực tiếp trở về địa chỉ hình ảnh công khai.</p>
+                <p className="text-xs text-stone-500">If left blank, falls back to the app proxy (/images/...). If filled, uses the public URL directly.</p>
               </div>
             </div>
           </div>
@@ -408,10 +408,10 @@ export function ConfigCard() {
                 checked={Boolean(config?.ai_review?.enabled)}
                 onCheckedChange={(checked) => setAIReviewField("enabled", Boolean(checked))}
               />
-              kích hoạt AI đánh giá
+              Enable AI Moderation
             </label>
             <p className="text-xs leading-6 text-stone-500">
-              Khi được bật, mô hình kiểm tra sẽ được gọi trước khi yêu cầu nhập accounts Shengtu.，Việc không vượt qua được đánh giá sẽ dẫn đến việc bị từ chối trực tiếp.，Giảm nguy cơ lời nhắc bất hợp pháp đến accounts, gây ra rủi ro kiểm soát hoặc đình chỉ accounts。
+              When enabled, a moderation model evaluates inputs before forwarding to image-generation accounts. Non-compliant prompts are blocked immediately, reducing account suspension risk.
             </p>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
@@ -428,8 +428,8 @@ export function ConfigCard() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-stone-700">Kiểm tra lời nhắc</label>
-              <Textarea value={String(config?.ai_review?.prompt || "")} onChange={(event) => setAIReviewField("prompt", event.target.value)} placeholder="Xác định xem yêu cầu của người dùng có được phép hay không. Chỉ cần trả lời CHO PHÉP hoặc TỪ CHỐI." className="min-h-24 rounded-xl border-stone-200 bg-white text-xs shadow-none" />
+              <label className="text-sm text-stone-700">Moderation Prompt</label>
+              <Textarea value={String(config?.ai_review?.prompt || "")} onChange={(event) => setAIReviewField("prompt", event.target.value)} placeholder="Evaluate whether the user request is allowed. Respond ONLY with ALLOW or DENY." className="min-h-24 rounded-xl border-stone-200 bg-white text-xs shadow-none" />
             </div>
           </div>
         </div>
@@ -441,7 +441,7 @@ export function ConfigCard() {
             disabled={isSavingConfig}
           >
             {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-            lưu lại
+            Save
           </Button>
         </div>
       </CardContent>

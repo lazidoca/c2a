@@ -34,7 +34,7 @@ export type Account = {
   restore_at?: string | null;
   success: number;
   fail: number;
-  /** Số lượng hình ảnh hiện đang được chuyển tiếp(Đang tạo, Số lượng hình ảnh chưa hoàn thành). Kéo dài khi nhóm số không hoạt động > 0 Cho biết rò rỉ khe cắm đồng thời.  */
+  /** Number of images currently in flight (generating, incomplete images). If this value remains > 0 while the pool is idle, it indicates a concurrent slot leak. */
   image_inflight?: number;
   last_used_at?: string | null;
   proxy?: string | null;

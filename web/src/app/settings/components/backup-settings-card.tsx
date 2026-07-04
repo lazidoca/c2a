@@ -225,30 +225,30 @@ export function BackupSettingsCard() {
           <div className="space-y-2">
             <label className="text-sm text-stone-700">Backup Prefix</label>
             <Input value={String(backup.prefix || "")} onChange={(event) => setBackupField("prefix", event.target.value)} placeholder="backups" className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Tiền tố đối tượng trong R2, chẳng hạn như `backups/prod`.</p>
+            <p className="text-xs text-stone-500">Object prefix in R2, such as `backups/prod`.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm text-stone-700">Scheduled Backup Interval</label>
             <Input value={String(backup.interval_minutes || "")} onChange={(event) => setBackupField("interval_minutes", event.target.value)} placeholder="360" className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Đơn vị là phút. Sau khi dịch vụ được khởi động, nó sẽ tự động được thăm dò và thực thi trong khoảng thời gian này.</p>
+            <p className="text-xs text-stone-500">In minutes. The service automatically polls and executes the backup at this interval.</p>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm text-stone-700">Backup Retention Count</label>
             <Input value={String(backup.rotation_keep || "")} onChange={(event) => setBackupField("rotation_keep", event.target.value)} placeholder="10" className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Các bản Backup cũ hơn sẽ tự động bị xóa sau khi tải lên thành công. Điền vào `0` để biểu thị không có chế độ xoay tự động.</p>
+            <p className="text-xs text-stone-500">Older backups are automatically deleted after a successful upload. Set to `0` to disable rotation.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm text-stone-700">Encryption Passphrase</label>
             <Input type="password" value={String(backup.passphrase || "")} onChange={(event) => setBackupField("passphrase", event.target.value)} placeholder={backup.encrypt ? "Required after enabling encryption" : "Leave blank"} className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Chỉ được sử dụng khi bật mã hóa. Vui lòng giữ nó đúng cách, nếu không nội dung Backup sẽ không thể được giải mã.</p>
+            <p className="text-xs text-stone-500">Only used when encryption is enabled. Please keep it safe; otherwise, backups cannot be decrypted.</p>
           </div>
           </div>
 
           <div className="space-y-3 rounded-xl border border-stone-200 bg-white px-4 py-4">
           <div>
             <div className="text-sm font-medium text-stone-800">Backup Content</div>
-            <p className="mt-1 text-xs text-stone-500">Chọn dữ liệu cần đưa vào gói Backup theo thành phần.</p>
+            <p className="mt-1 text-xs text-stone-500">Select the data components to include in the backup package.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             {includeLabels.map((item) => (
@@ -317,7 +317,7 @@ export function BackupSettingsCard() {
             </div>
           ) : backups.length === 0 ? (
             <div className="rounded-xl bg-stone-50 px-6 py-10 text-center text-sm text-stone-500">
-              Chưa có bản ghi Backup từ xa nào。Nó sẽ xuất hiện ở đây sau khi lưu cấu hình và thực hiện Backup thủ công。
+              No remote backup records found. They will appear here after saving configuration and performing a manual backup.
             </div>
           ) : (
             <div className="space-y-3">
@@ -328,12 +328,12 @@ export function BackupSettingsCard() {
                     <div className="min-w-0 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <div className="break-all text-sm font-medium text-stone-800">{item.name}</div>
-                        {item.encrypted ? <Badge variant="secondary" className="rounded-md">Đã mã hóa</Badge> : null}
+                        {item.encrypted ? <Badge variant="secondary" className="rounded-md">Encrypted</Badge> : null}
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">
-                        <span>kích thước {formatBytes(item.size)}</span>
-                        <span>Time cập nhật {formatDateTime(item.updated_at)}</span>
-                        <span className="break-all">đối tượng key {item.key}</span>
+                        <span>size {formatBytes(item.size)}</span>
+                        <span>Updated at {formatDateTime(item.updated_at)}</span>
+                        <span className="break-all">object key {item.key}</span>
                       </div>
                     </div>
 
@@ -349,7 +349,7 @@ export function BackupSettingsCard() {
                       </Button>
                       <Button type="button" variant="outline" className="h-9 rounded-xl border-stone-200 bg-white px-4 text-stone-700" onClick={() => void handleOpenDetail(item.key)}>
                         <Eye className="size-4" />
-                        View chi tiết
+                        View Details
                       </Button>
                       <Button
                         type="button"
@@ -374,7 +374,7 @@ export function BackupSettingsCard() {
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col overflow-hidden rounded-2xl border-white/80 bg-white">
           <DialogHeader className="shrink-0 border-b border-stone-200 pb-3">
-            <DialogTitle>Details Backup</DialogTitle>
+            <DialogTitle>Backup Details</DialogTitle>
           </DialogHeader>
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
             {detailLoading ? (
@@ -383,42 +383,42 @@ export function BackupSettingsCard() {
               </div>
             ) : !detail ? (
               <div className="rounded-xl bg-stone-50 px-6 py-10 text-center text-sm text-stone-500">
-                Không thể đọc chi tiết Backup vào lúc này；Nếu đây là bản Backup được mã hóa，Vui lòng xác nhận rằng mật khẩu mã hóa chính xác đã được điền và lưu cấu hình trước。
+                Cannot read backup details at this time. If this is an encrypted backup, please confirm that the correct encryption passphrase was entered and that the configuration has been saved first.
               </div>
             ) : (
               <>
                 <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-600 md:grid-cols-2">
                   <div>
-                    <div className="text-xs text-stone-500">tên đối tượng</div>
+                    <div className="text-xs text-stone-500">Object Name</div>
                     <div className="mt-1 break-all font-medium text-stone-800">{detail.name}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-stone-500">thời gian sáng tạo</div>
+                    <div className="text-xs text-stone-500">Creation Time</div>
                     <div className="mt-1 font-medium text-stone-800">{formatDateTime(detail.created_at)}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-stone-500">Chế độ kích hoạt</div>
+                    <div className="text-xs text-stone-500">Trigger Mode</div>
                     <div className="mt-1 font-medium text-stone-800">{detail.trigger || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-stone-500">Phiên bản ứng dụng</div>
+                    <div className="text-xs text-stone-500">App Version</div>
                     <div className="mt-1 font-medium text-stone-800">{detail.app_version || "—"}</div>
                   </div>
                   <div className="md:col-span-2">
-                    <div className="text-xs text-stone-500">Phụ trợ lưu trữ</div>
+                    <div className="text-xs text-stone-500">Storage Backend</div>
                     <pre className="mt-1 overflow-x-auto rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700">{JSON.stringify(detail.storage_backend || {}, null, 2)}</pre>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-stone-800">Nội dung tập tin</h4>
+                  <h4 className="text-sm font-medium text-stone-800">File Contents</h4>
                   <div className="space-y-2">
                     {detail.files.map((item) => (
                       <div key={item.name} className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm">
                         <div className="break-all font-medium text-stone-800">{item.name}</div>
                         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">
-                          <span>{item.exists ? "Đã bao gồm" : "Thiếu"}</span>
-                          <span>kích thước {formatBytes(item.size)}</span>
+                          <span>{item.exists ? "Included" : "Missing"}</span>
+                          <span>size {formatBytes(item.size)}</span>
                           <span>{item.content_type || "application/octet-stream"}</span>
                           <span className="break-all">SHA256 {item.sha256 || "—"}</span>
                         </div>
@@ -428,12 +428,12 @@ export function BackupSettingsCard() {
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-stone-800">Nội dung ảnh chụp nhanh</h4>
+                  <h4 className="text-sm font-medium text-stone-800">Snapshot Contents</h4>
                   <div className="grid gap-3 md:grid-cols-2">
                     {detail.snapshots.map((item) => (
                       <div key={item.name} className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm">
                         <div className="font-medium text-stone-800">{item.name}</div>
-                        <div className="mt-2 text-xs text-stone-500">Số lượng hồ sơ {item.count}</div>
+                        <div className="mt-2 text-xs text-stone-500">Record count {item.count}</div>
                       </div>
                     ))}
                   </div>

@@ -23,7 +23,7 @@ export function DateRangeFilter({ startDate, endDate, onChange }: DateRangeFilte
       }
     : undefined;
 
-  const label = startDate ? `${startDate} đến ${endDate || startDate}` : "Chọn phạm vi ngày";
+  const label = startDate ? `${startDate} to ${endDate || startDate}` : "Select date range";
 
   return (
     <Field className="w-[240px]">

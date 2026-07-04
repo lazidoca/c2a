@@ -785,14 +785,13 @@ def worker(index: int) -> dict:
     step(index, f"Mailbox creation completed [{label}]: {email}")
     
     # 2. Determine proxy for registration
-    env_proxy = None
+    env_proxy = _build_register_proxy(email)
     if config.get("proxy_rotating_enabled"):
         rotating_proxy_manager.update_keys(config.get("proxy_rotating_keys") or [])
         final_proxy = rotating_proxy_manager.get_proxy() or ""
         if final_proxy:
             step(index, f"Using rotating proxy: {final_proxy}")
     else:
-        env_proxy = _build_register_proxy(email)
         if env_proxy:
             final_proxy = env_proxy
             step(index, f"Using registration proxy from environment: {final_proxy}")
@@ -803,9 +802,9 @@ def worker(index: int) -> dict:
     try:
         step(index, "Task started")
         result = registrar.register(mailbox, email, index)
-        if final_proxy:
-            result["proxy"] = final_proxy
-            step(index, f"Saving registration proxy with the created account: {final_proxy}")
+        if env_proxy:
+            result["proxy"] = env_proxy
+            step(index, f"Saving registration proxy with the created account: {env_proxy}")
         cost = time.time() - start
         access_token = str(result["access_token"])
         account_service.add_account_items([result])

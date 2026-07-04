@@ -1,6 +1,7 @@
 services:
   app:
     image: ghcr.io/lazidoca/c2a:latest
+    pull_policy: always
     container_name: chatgpt2api
     restart: unless-stopped
     ports:

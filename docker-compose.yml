@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./data:/app/data
+      - c2a-data:/app/data
       - ./config.json:/app/config.json
     environment:
       # 存储后端配置 (可选值: json, sqlite, postgres, git)
@@ -36,3 +36,6 @@ services:
        - CHATGPT2API_REGISTER_PROXY_PORT=${CHATGPT2API_REGISTER_PROXY_PORT}
        - CHATGPT2API_REGISTER_PROXY_USERNAME=${CHATGPT2API_REGISTER_PROXY_USERNAME}
        - CHATGPT2API_REGISTER_PROXY_PASSWORD=${CHATGPT2API_REGISTER_PROXY_PASSWORD}
+
+volumes:
+  c2a-data:

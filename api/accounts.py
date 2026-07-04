@@ -32,6 +32,8 @@ from services.sub2api_service import (
     sub2api_config,
     sub2api_import_service,
 )
+from services.register.openai_register import _build_register_proxy
+from services.log_service import LOG_TYPE_ACCOUNT, log_service
 
 
 
@@ -69,6 +71,10 @@ class AccountUpdateRequest(BaseModel):
     status: str | None = None
     quota: int | None = None
     proxy: str | None = None
+
+
+class AutoAssignProxyRequest(BaseModel):
+    access_tokens: list[str] | None = None
 
 
 class CPAPoolCreateRequest(BaseModel):
@@ -343,6 +349,43 @@ def create_router() -> APIRouter:
         if account is None:
             raise HTTPException(status_code=404, detail={"error": "account not found"})
         return {"item": account, "items": account_service.list_accounts()}
+
+    @router.post("/api/accounts/auto-assign-proxy")
+    async def auto_assign_proxy(body: AutoAssignProxyRequest, authorization: str | None = Header(default=None)):
+        require_admin(authorization)
+        
+        # Get target accounts
+        if body.access_tokens is not None:
+            tokens_set = set(body.access_tokens)
+            accounts = [acc for acc in account_service.list_accounts() if acc.get("access_token") in tokens_set]
+        else:
+            accounts = account_service.list_accounts()
+            
+        assigned_count = 0
+        updated_tokens = []
+        
+        for account in accounts:
+            proxy = str(account.get("proxy") or "").strip()
+            if not proxy:
+                email = str(account.get("email") or "").strip()
+                if email:
+                    env_proxy = _build_register_proxy(email)
+                    if env_proxy:
+                        access_token = account.get("access_token")
+                        account_service.update_account(access_token, {"proxy": env_proxy}, quiet=True)
+                        assigned_count += 1
+                        updated_tokens.append(access_token)
+                        
+        if assigned_count > 0:
+            log_service.add(
+                LOG_TYPE_ACCOUNT,
+                f"Auto assigned proxy for {assigned_count} accounts",
+                {"count": assigned_count}
+            )
+            # Refresh accounts to sync status
+            account_service.refresh_accounts(updated_tokens)
+            
+        return {"assigned": assigned_count, "items": account_service.list_accounts()}
 
     @router.post("/api/accounts/oauth/start")
     async def start_oauth_login(

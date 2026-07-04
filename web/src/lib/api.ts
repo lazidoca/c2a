@@ -551,6 +551,19 @@ export async function updateAccount(
   };
 }
 
+export async function autoAssignProxy(accessTokens?: string[]) {
+  const res = await httpRequest<{ assigned: number; items: any[] }>("/api/accounts/auto-assign-proxy", {
+    method: "POST",
+    body: {
+      access_tokens: accessTokens,
+    },
+  });
+  return {
+    assigned: res.assigned,
+    items: Array.isArray(res.items) ? res.items.map(mapAccountToFE) : [],
+  };
+}
+
 export async function generateImage(prompt: string, model?: ImageModel, size?: string, quality = "auto") {
   return httpRequest<ImageResponse>("/v1/images/generations",
     {

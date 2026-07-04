@@ -52,6 +52,7 @@ import {
   refreshAccounts,
   testProxy,
   updateAccount,
+  autoAssignProxy,
   type Account,
   type AccountRefreshResponse,
   type AccountStatus,
@@ -206,6 +207,7 @@ function AccountsPageContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRelogining, setIsRelogining] = useState(false);
+  const [isAssigningProxy, setIsAssigningProxy] = useState(false);
   const [progress, setProgress] = useState<{
     visible: boolean;
     current: number;
@@ -312,6 +314,11 @@ function AccountsPageContent() {
   const abnormaltokenss = useMemo(() => {
     return accounts.filter((item) => item.status === "Abnormal").map((item) => item.access_token);
   }, [accounts]);
+
+  const selectedUnassignedCount = useMemo(() => {
+    const selectedSet = new Set(selectedIds);
+    return accounts.filter((item) => selectedSet.has(item.access_token) && !item.proxy).length;
+  }, [accounts, selectedIds]);
 
   const paginationItems = useMemo(() => {
     const items: (number | "...")[] = [];
@@ -726,6 +733,26 @@ function AccountsPageContent() {
     }
   };
 
+  const handleAutoAssignProxy = async (tokens: string[]) => {
+    if (tokens.length === 0) {
+      toast.error("Please select the accounts you want to auto assign proxy first");
+      return;
+    }
+
+    setIsAssigningProxy(true);
+    try {
+      const data = await autoAssignProxy(tokens);
+      setAccounts(data.items);
+      setSelectedIds((prev) => prev.filter((id) => data.items.some((item) => item.access_token === id)));
+      toast.success(`Successfully assigned environment proxy to ${data.assigned} accounts`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to auto assign proxy";
+      toast.error(message);
+    } finally {
+      setIsAssigningProxy(false);
+    }
+  };
+
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedIds((prev) => Array.from(new Set([...prev, ...currentRows.map((item) => item.access_token)])));
@@ -1036,6 +1063,16 @@ function AccountsPageContent() {
                 >
                   {isRelogining ? <LoaderCircle className="size-4 animate-spin" /> : <LogIn className="size-4" />}
                   Attempt to recover Abnormal accounts
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="h-8 rounded-lg px-3 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                  onClick={() => void handleAutoAssignProxy(selectedtokenss)}
+                  disabled={selectedUnassignedCount === 0 || isAssigningProxy}
+                  title="Assign environment proxy to selected accounts that have no proxy"
+                >
+                  {isAssigningProxy ? <LoaderCircle className="size-4 animate-spin" /> : <Link2 className="size-4" />}
+                  Auto assign proxy ({selectedUnassignedCount})
                 </Button>
                 <Button
                   variant="ghost"

@@ -49,7 +49,7 @@ Body:
 
 - API 返回的 \`answer\` 将作为主要回答。
 - 如果有 \`sources\`，请在回答中包含源链接。
-- 如果 API 报错，简要描述错误并询问是否重试。\`, [apiBaseUrl, authKey]);
+- 如果 API 报错，简要描述错误并询问是否重试。`, [apiBaseUrl, authKey]);
 
   const skillEn = useMemo(() => `---
 name: chatgpt2api-search

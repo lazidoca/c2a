@@ -554,9 +554,9 @@ class OpenAIBackendAPI:
         normalized = str(value or "").strip().lower()
         if normalized in {"", "none"}:
             return ""
-        if normalized in {"low", "medium", "high"}:
-            return normalized
-        if normalized in {"xhigh", "extended"}:
+        if normalized in {"low", "medium", "standard"}:
+            return "standard"
+        if normalized in {"high", "xhigh", "extended"}:
             return "extended"
         return ""
 
@@ -601,7 +601,7 @@ class OpenAIBackendAPI:
             },
         }
         normalized_effort = self._normalize_thinking_effort(thinking_effort)
-        if normalized_effort:
+        if normalized_effort and (web_model.startswith("o") or "thinking" in web_model):
             payload["thinking_effort"] = normalized_effort
         return payload
 

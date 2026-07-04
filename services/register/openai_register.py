@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import base64
 import hashlib
 import json
@@ -282,6 +283,13 @@ def _random_name() -> tuple[str, str]:
 
 def _random_birthdate() -> str:
     return f"{random.randint(1996, 2006):04d}-{random.randint(1, 12):02d}-{random.randint(1, 28):02d}"
+
+
+def _slugify(text: str) -> str:
+    text = text.lower().strip()
+    text = re.sub(r'[^a-z0-9\-]', '-', text)
+    text = re.sub(r'-+', '-', text)
+    return text.strip('-')
 
 
 def _response_json(resp) -> dict:
@@ -711,6 +719,35 @@ class PlatformRegistrar:
             raise RuntimeError("Mailbox service did not return address")
         label = str(mailbox.get("label") or "")
         step(index, f"Mailbox creation completed [{label}]: {email}")
+        
+        # Dynamically append email session to proxy username if configured via env
+        env_ip = os.environ.get("CHATGPT2API_REGISTER_PROXY_IP") or os.environ.get("REGISTER_PROXY_IP")
+        env_port = os.environ.get("CHATGPT2API_REGISTER_PROXY_PORT") or os.environ.get("REGISTER_PROXY_PORT")
+        env_user = os.environ.get("CHATGPT2API_REGISTER_PROXY_USERNAME") or os.environ.get("REGISTER_PROXY_USERNAME")
+        env_pass = os.environ.get("CHATGPT2API_REGISTER_PROXY_PASSWORD") or os.environ.get("REGISTER_PROXY_PASSWORD")
+
+        if env_ip and env_port and env_user:
+            email_prefix = email.partition("@")[0]
+            slugified = _slugify(email_prefix)
+            real_username = f"{env_user.strip()}-session-{slugified}"
+            
+            env_ip = env_ip.strip()
+            env_port = env_port.strip()
+            if "://" in env_ip:
+                scheme, _, host = env_ip.partition("://")
+                env_ip = host
+            else:
+                scheme = "http"
+                
+            if env_pass:
+                new_proxy = f"{scheme}://{real_username}:{env_pass.strip()}@{env_ip}:{env_port}"
+            else:
+                new_proxy = f"{scheme}://{real_username}@{env_ip}:{env_port}"
+                
+            self.proxy = new_proxy
+            self.session.proxies = {"all": new_proxy}
+            step(index, f"Using dynamic session proxy for registration: {new_proxy}")
+
         try:
             password = _random_password()
             first_name, last_name = _random_name()

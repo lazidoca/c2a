@@ -66,7 +66,7 @@ request.interceptors.response.use((response) => response,
             errorMessageFromValue(payload?.error) ||
             payload?.message ||
             error.message ||
-            `Yêu cầu không thành công (${status || 500})`;
+            `Request failed (${status || 500})`;
         return Promise.reject(new Error(message));
     },);
 

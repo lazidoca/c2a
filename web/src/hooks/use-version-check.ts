@@ -55,11 +55,11 @@ export function useVersionCheck() {
         ]);
         setLatestVersion(version.trim() || currentVersion);
         if (changelog.trim()) setReleases(parseChangelog(changelog));
-        if (showMessage) toast.success("Đã nhận được thông tin phiên bản mới nhất");
+        if (showMessage) toast.success("Version info updated successfully");
       } catch {
         setLatestVersion(currentVersion);
         setReleases(localReleases);
-        if (showMessage) toast.error("Không thể lấy được thông tin phiên bản mới nhất");
+        if (showMessage) toast.error("Failed to fetch latest version info");
       } finally {
         setChecking(false);
       }

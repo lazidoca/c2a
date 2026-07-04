@@ -432,7 +432,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         config: normalized,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không tải được cấu hình hệ thống");
+      toast.error(error instanceof Error ? error.message : "Failed to load system config");
     } finally {
       set({ isLoadingConfig: false });
     }
@@ -522,10 +522,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         config: normalizeConfig(data.config),
       });
       window.dispatchEvent(new Event("third-party-apps-updated"));
-      toast.success("Đã lưu cấu hình");
+      toast.success("Config saved");
       return true;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không lưu được cấu hình hệ thống");
+      toast.error(error instanceof Error ? error.message : "Failed to save system config");
       return false;
     } finally {
       set({ isSavingConfig: false });
@@ -776,7 +776,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         return;
       }
       const data = await syncImageStorage();
-      toast.success(`Quá trình đồng bộ hóa đã hoàn tất: tải lên ${data.result.uploaded}, bỏ qua ${data.result.skipped}, không thành công ${data.result.failed}`);
+      toast.success(`Quá trình đồng bộ hóa đã hoàn tất: tải lên ${data.result.uploaded}, skip ${data.result.skipped}, không thành công ${data.result.failed}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Không thể đồng bộ hóa hình ảnh");
     } finally {
@@ -833,7 +833,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       });
     } catch (error) {
       if (!silent) {
-        toast.error(error instanceof Error ? error.message : "Không tải được danh sách sao lưu");
+        toast.error(error instanceof Error ? error.message : "Failed to load backup list");
       }
     } finally {
       if (!silent) {
@@ -850,10 +850,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         return;
       }
       const data = await runBackupNow();
-      toast.success(`Sao lưu hoàn tất: ${data.result.key}`);
+      toast.success(`Backup hoàn tất: ${data.result.key}`);
       await get().loadBackups(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không thể thực hiện sao lưu");
+      toast.error(error instanceof Error ? error.message : "Failed to perform backup");
     } finally {
       set({ isRunningBackup: false });
     }
@@ -863,10 +863,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     set({ deletingBackupKey: key });
     try {
       await deleteBackup(key);
-      toast.success("Đã xóa bản sao lưu");
+      toast.success("Deleted bản Backup");
       await get().loadBackups(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không xóa được bản sao lưu");
+      toast.error(error instanceof Error ? error.message : "Failed to delete backup");
     } finally {
       set({ deletingBackupKey: null });
     }
@@ -882,7 +882,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       const data = await testBackupConnection();
       toast.success(`Kết nối R2 vẫn ổn (HTTP ${data.result.status})`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kiểm tra kết nối sao lưu không thành công");
+      toast.error(error instanceof Error ? error.message : "Kiểm tra kết nối Backup không thành công");
     } finally {
       set({ isTestingBackup: false });
     }
@@ -894,7 +894,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       const data = await fetchRegisterConfig();
       set({ registerConfig: data.register });
     } catch (error) {
-      if (!silent) toast.error(error instanceof Error ? error.message : "Không tải được cấu hình đăng ký");
+      if (!silent) toast.error(error instanceof Error ? error.message : "Failed to load registration config");
     } finally {
       if (!silent) set({ isLoadingRegister: false });
     }
@@ -1011,9 +1011,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         check_interval: Math.max(1, Number(registerConfig.check_interval) || 5),
       });
       set({ registerConfig: data.register });
-      toast.success("Đã lưu cấu hình đăng ký");
+      toast.success("Config saved đăng ký");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không lưu được cấu hình đăng ký");
+      toast.error(error instanceof Error ? error.message : "Failed to save registration config");
     } finally {
       set({ isSavingRegister: false });
     }
@@ -1042,7 +1042,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       set({ registerConfig: data.register });
       toast.success(registerConfig.enabled ? "Nhiệm vụ đăng ký đã bị dừng" : "Nhiệm vụ đăng ký đã bắt đầu");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không thể chuyển trạng thái đăng ký");
+      toast.error(error instanceof Error ? error.message : "Failed to toggle registration status");
     } finally {
       set({ isSavingRegister: false });
     }
@@ -1055,7 +1055,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       set({ registerConfig: data.register });
       toast.success("Thống kê đăng ký đã được thiết lập lại");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không thể thiết lập lại thống kê đăng ký");
+      toast.error(error instanceof Error ? error.message : "Failed to reset registration stats");
     } finally {
       set({ isSavingRegister: false });
     }
@@ -1066,9 +1066,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     try {
       const data = await resetOutlookPoolApi(scope);
       set({ registerConfig: data.register });
-      toast.success(scope === "unused" ? "Hộp thư không sử dụng đã bị xóa" : scope === "failed" ? "Đã xóa trạng thái hộp thư bị lỗi/bị chiếm dụng" : "Tất cả trạng thái pool email Outlook đã được đặt lại");
+      toast.success(scope === "unused" ? "Hộp thư không sử dụng đã bị xóa" : scope === "failed" ? "Deleted trạng thái hộp thư bị lỗi/bị chiếm dụng" : "All statuses pool email Outlook đã được đặt lại");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không thể đặt lại trạng thái pool email");
+      toast.error(error instanceof Error ? error.message : "Failed to reset email pool status");
     } finally {
       set({ isSavingRegister: false });
     }
@@ -1083,7 +1083,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       set({ pools: data.pools });
     } catch (error) {
       if (!silent) {
-        toast.error(error instanceof Error ? error.message : "Không tải được kết nối CPA");
+        toast.error(error instanceof Error ? error.message : "Failed to load CPA connections");
       }
     } finally {
       if (!silent) {
@@ -1154,7 +1154,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           secret_key: formSecretKey.trim() || undefined,
         });
         set({ pools: data.pools, dialogOpen: false });
-        toast.success("Đã cập nhật kết nối");
+        toast.success("Connection updated");
       } else {
         const data = await createCPAPool({
           name: formName.trim(),
@@ -1162,10 +1162,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           secret_key: formSecretKey.trim(),
         });
         set({ pools: data.pools, dialogOpen: false });
-        toast.success("Đã thêm kết nối");
+        toast.success("Đã additional kết nối");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Lưu không thành công");
+      toast.error(error instanceof Error ? error.message : "Save không thành công");
     } finally {
       set({ isSavingPool: false });
     }
@@ -1176,9 +1176,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     try {
       const data = await deleteCPAPool(pool.id);
       set({ pools: data.pools });
-      toast.success("Đã xóa kết nối");
+      toast.success("Deleted kết nối");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Xóa không thành công");
+      toast.error(error instanceof Error ? error.message : "Delete không thành công");
     } finally {
       set({ deletingId: null });
     }
@@ -1197,9 +1197,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         filePage: 1,
         browserOpen: true,
       });
-      toast.success(`Đọc thành công, tổng số ${files.length} tài khoản từ xa`);
+      toast.success(`Đọc thành công, tổng số ${files.length} accounts từ xa`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không đọc được tài khoản từ xa");
+      toast.error(error instanceof Error ? error.message : "Không đọc được accounts từ xa");
     } finally {
       set({ loadingFilesId: null });
     }
@@ -1244,7 +1244,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       return;
     }
     if (selectedNames.length === 0) {
-      toast.error("Vui lòng chọn tài khoản để nhập trước");
+      toast.error("Please select accounts để nhập trước");
       return;
     }
 

@@ -16,10 +16,10 @@ import { cn } from "@/lib/utils";
 import { clearStoredAuthSession, type StoredAuthSession } from "@/store/auth";
 
 const adminNavItems = [
-  { href: "/accounts", label: "Quản lý nhóm số" },
+  { href: "/accounts", label: "Account Pool" },
   { href: "/register", label: "Keygen" },
-  { href: "/image-manager", label: "Quản lý hình ảnh" },
-  { href: "/logs", label: "Quản lý nhật ký" },
+  { href: "/image-manager", label: "Image Manager" },
+  { href: "/logs", label: "Log Manager" },
   { href: "/debug", label: "Gỡ lỗi" },
   { href: "/settings", label: "cài đặt" },
 ];
@@ -108,7 +108,7 @@ export function TopNav() {
   }
 
   const navItems = session.role === "admin" ? adminNavItems : userNavItems;
-  const roleLabel = session.role === "admin" ? "Quản trị viên" : "Người dùng thông thường";
+  const roleLabel = session.role === "admin" ? "Quản trị viên" : "User thông thường";
   const displayName = session.name.trim() || roleLabel;
   const baseUrl = webConfig.apiUrl.replace(/\/$/, "") || window.location.origin;
   const canvas = thirdPartyApps?.infinite_canvas;
@@ -137,7 +137,7 @@ export function TopNav() {
             <Sheet>
               <SheetTrigger className="inline-flex size-8 items-center justify-center text-stone-700 transition hover:text-stone-950 sm:hidden dark:text-stone-200 dark:hover:text-white">
                 <Menu className="size-4" />
-                <span className="sr-only">Mở điều hướng</span>
+                <span className="sr-only">Open navigation</span>
               </SheetTrigger>
               <SheetContent side="left">
                 <SheetHeader>
@@ -152,7 +152,7 @@ export function TopNav() {
                         className="flex items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-950 dark:text-stone-300 dark:hover:bg-white/10 dark:hover:text-white"
                         onClick={handleCanvasOpen}
                       >
-                        vải vô hạn
+                        Infinite Canvas
                       </button>
                     </SheetClose>
                   ) : null}
@@ -175,7 +175,7 @@ export function TopNav() {
                     className="rounded-xl border border-stone-200 px-3 py-2.5 text-left text-sm font-medium text-stone-500 transition hover:text-stone-950 dark:border-white/10 dark:text-stone-300 dark:hover:text-white"
                     onClick={() => void handleLogout()}
                   >
-                    Thoát
+                    Logout
                   </button>
                 </SheetFooter>
               </SheetContent>
@@ -195,7 +195,7 @@ export function TopNav() {
                 onClick={handleCanvasOpen}
                 className="relative shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] font-medium text-stone-500 transition hover:text-stone-900 sm:rounded-none sm:px-0 sm:text-[15px] dark:text-stone-400 dark:hover:text-stone-100"
               >
-                vải vô hạn
+                Infinite Canvas
               </button>
             ) : null}
             {navItems.map((item) => {
@@ -227,7 +227,7 @@ export function TopNav() {
               className="py-1 text-xs text-stone-400 transition hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200 sm:text-sm"
               onClick={() => void handleLogout()}
             >
-              Thoát
+              Logout
             </button>
           </div>
         </div>
@@ -235,13 +235,13 @@ export function TopNav() {
       <Dialog open={isCanvasDialogOpen} onOpenChange={setIsCanvasDialogOpen}>
         <DialogContent showCloseButton={false} className="rounded-2xl p-6">
           <DialogHeader className="gap-2">
-            <DialogTitle>Chuyển sang ứng dụng của bên thứ ba</DialogTitle>
+            <DialogTitle>Redirect to third-party app</DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Lối vào này chỉ dành cho thử nghiệm cá nhân，Nên triển khai cục bộ trước khi sử dụng lâu dài.。Địa chỉ nhảy sẽ chứa địa chỉ dự án và khóa hiện tại theo mặc định.，Được sử dụng để tự động điền thông tin kết nối；Nếu bạn lo lắng，Bạn có thể hủy và tự vào ứng dụng rồi tự nhập.。
+              This entrance is for personal testing only. Local deployment is recommended for long-term use. The redirect URL will include the project address and key by default to auto-fill connection info. If you are concerned, you can cancel and enter the app manually.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <div className="text-xs font-medium text-stone-500">Địa chỉ nhảy hoàn chỉnh</div>
+            <div className="text-xs font-medium text-stone-500">Full redirect URL</div>
             <div className="max-h-28 overflow-auto break-all rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 font-mono text-xs leading-5 text-stone-700">
               {canvasDisplayHref}
             </div>
@@ -249,11 +249,11 @@ export function TopNav() {
           <DialogFooter className="pt-2">
             <DialogClose asChild>
               <Button type="button" variant="outline" className="rounded-xl border-stone-200 bg-white text-stone-700">
-                Hủy bỏ
+                Cancel
               </Button>
             </DialogClose>
             <Button type="button" className="rounded-xl bg-stone-950 text-white hover:bg-stone-800" onClick={confirmCanvasOpen}>
-              Tiếp tục nhảy
+              Continue
             </Button>
           </DialogFooter>
         </DialogContent>

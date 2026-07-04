@@ -2,8 +2,8 @@
 
 import { EditableFilePanel } from "./editable-file-panel";
 
-const defaultPrompt = "Tách các thành phần áp phích theo vị trí hình ảnh gốc và tổng hợp chúng thành PSD có thể chỉnh sửa, giữ lại nền và vị trí lớp của từng thành phần, đồng thời xuất ra từng zip vật liệu lớp.";
+const defaultPrompt = "Separate the poster elements based on their original positions in the image and compile them into an editable PSD file. Retain the background and layer positions for each element, and export each layer's assets into a zip folder.";
 
 export function PsdPanel() {
-  return <EditableFilePanel title="thế hệ PSD" kind="psd" endpoint="/v1/psd/generations" defaultPrompt={defaultPrompt} imageRequired />;
+  return <EditableFilePanel title="Generate PSD" kind="psd" endpoint="/v1/psd/generations" defaultPrompt={defaultPrompt} imageRequired />;
 }

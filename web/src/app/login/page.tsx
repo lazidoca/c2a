@@ -22,7 +22,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     const normalizedAuthKey = authKey.trim();
     if (!normalizedAuthKey) {
-      toast.error("Vui lòng nhập khóa");
+      toast.error("Please enter key");
       return;
     }
 
@@ -37,7 +37,7 @@ export default function LoginPage() {
       });
       router.replace(getDefaultRouteForRole(data.role));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Đăng nhập không thành công";
+      const message = error instanceof Error ? error.message : "Login failed";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -62,8 +62,8 @@ export default function LoginPage() {
               <LockKeyhole className="size-5" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-stone-950">chào mừng trở lại</h1>
-              <p className="text-sm leading-6 text-stone-500">Sau khi nhập key, tiếp tục sử dụng chức năng quản lý tài khoản và tạo hình ảnh.</p>
+              <h1 className="text-3xl font-semibold tracking-tight text-stone-950">Welcome back</h1>
+              <p className="text-sm leading-6 text-stone-500">After entering the key, continue using the account management and image generation features.</p>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
                   void handleLogin();
                 }
               }}
-              placeholder="Vui lòng nhập API Key"
+              placeholder="Please enter API Key"
               className="h-13 rounded-2xl border-stone-200 bg-white px-4"
             />
           </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
             disabled={isSubmitting}
           >
             {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            Đăng nhập
+            Login
           </Button>
         </CardContent>
       </Card>

@@ -28,7 +28,7 @@ export function CPAPoolsCard() {
             </div>
             <div>
               <h2 className="text-lg font-semibold tracking-tight">Quản lý kết nối CPA</h2>
-              <p className="text-sm text-stone-500">Trước tiên hãy định cấu hình kết nối, sau đó truy vấn tài khoản từ xa nếu cần và chọn nhập nó vào pool tài khoản cục bộ.</p>
+              <p className="text-sm text-stone-500">Trước tiên hãy định cấu hình kết nối, sau đó truy vấn accounts từ xa nếu cần và chọn nhập nó vào pool accounts cục bộ.</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function CPAPoolsCard() {
                         className="rounded-lg p-2 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
                         onClick={() => openEditDialog(pool)}
                         disabled={isBusy}
-                        title="Chỉnh sửa"
+                        title="Edit"
                       >
                         <Pencil className="size-4" />
                       </button>
@@ -83,7 +83,7 @@ export function CPAPoolsCard() {
                         className="rounded-lg p-2 text-stone-400 transition hover:bg-rose-50 hover:text-rose-500"
                         onClick={() => void deletePool(pool)}
                         disabled={isBusy}
-                        title="Xóa"
+                        title="Delete"
                       >
                         {deletingId === pool.id ? (
                           <LoaderCircle className="size-4 animate-spin" />
@@ -117,7 +117,7 @@ export function CPAPoolsCard() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-stone-700">
-                              Trạng thái {importJob.status}，Đã xử lý {importJob.completed}/{importJob.total}
+                              Trạng thái {importJob.status}，Processed {importJob.completed}/{importJob.total}
                             </div>
                             <div className="truncate text-xs text-stone-400">
                               Nhiệm vụ {importJob.job_id.slice(0, 8)} · {importJob.created_at}
@@ -141,8 +141,8 @@ export function CPAPoolsCard() {
                         </div>
                         <div className="mt-2 flex flex-wrap gap-2 text-xs text-stone-500">
                           <span>Mới {importJob.added}</span>
-                          <span>bỏ qua {importJob.skipped}</span>
-                          <span>Làm mới {importJob.refreshed}</span>
+                          <span>skip {importJob.skipped}</span>
+                          <span>Refresh {importJob.refreshed}</span>
                           <span>thất bại {importJob.failed}</span>
                         </div>
                       </div>
@@ -158,8 +158,8 @@ export function CPAPoolsCard() {
           <p className="font-medium text-stone-600">Hướng dẫn sử dụng</p>
           <ul className="mt-1 list-inside list-disc space-y-0.5">
             <li>Sau khi vào trang, đầu tiên nó sẽ đọc kết nối CPA đã định cấu hình trong hệ thống.</li>
-            <li>Sau khi nhấp vào "Đồng bộ hóa" trên một kết nối nhất định, danh sách tài khoản từ xa sẽ được đọc trước và hiển thị ở giao diện người dùng để lựa chọn.</li>
-            <li>Sau khi xác nhận lựa chọn, phần phụ trợ sẽ tải xuống access_token tương ứng và nhập nó vào pool tài khoản cục bộ.</li>
+            <li>Sau khi nhấp vào "Đồng bộ hóa" trên một kết nối nhất định, danh sách accounts từ xa sẽ được đọc trước và hiển thị ở giao diện người dùng để lựa chọn.</li>
+            <li>Sau khi xác nhận lựa chọn, phần phụ trợ sẽ tải xuống access_token tương ứng và nhập nó vào pool accounts cục bộ.</li>
             <li>Giao diện người dùng chỉ thăm dò tiến trình nhập và không trực tiếp tham gia tải xuống.</li>
           </ul>
         </div>

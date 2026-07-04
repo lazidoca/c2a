@@ -1,7 +1,7 @@
 import { httpRequest, request } from "@/lib/request";
 
 export type AccountType = string;
-export type AccountStatus = "bình thường" | "Giới hạn hiện tại" | "bất thường" | "Vô hiệu hóa";
+export type AccountStatus = "Normal" | "Rate limited" | "Abnormal" | "Disabled";
 export type ImageModel = string;
 export type AuthRole = "admin" | "user";
 export type ImageStorageMode = "local" | "webdav" | "both";
@@ -42,7 +42,7 @@ export type Account = {
 
 export type AccountImportPayload = {
   access_token: string;
-  accessToken?: string;
+  accesstokens?: string;
   type?: string;
   export_type?: string;
   source_type?: string;
@@ -368,21 +368,21 @@ export type RegisterConfig = {
 };
 
 const STATUS_MAP_TO_FE: Record<string, AccountStatus> = {
-  "正常": "bình thường",
-  "限流": "Giới hạn hiện tại",
-  "异常": "bất thường",
-  "禁用": "Vô hiệu hóa",
-  "bình thường": "bình thường",
-  "Giới hạn hiện tại": "Giới hạn hiện tại",
-  "bất thường": "bất thường",
-  "Vô hiệu hóa": "Vô hiệu hóa",
+  "正常": "Normal",
+  "限流": "Rate limited",
+  "异常": "Abnormal",
+  "禁用": "Disabled",
+  "Normal": "Normal",
+  "Rate limited": "Rate limited",
+  "Abnormal": "Abnormal",
+  "Disabled": "Disabled",
 };
 
 const STATUS_MAP_TO_BE: Record<string, string> = {
-  "bình thường": "正常",
-  "Giới hạn hiện tại": "限流",
-  "bất thường": "异常",
-  "Vô hiệu hóa": "禁用",
+  "Normal": "正常",
+  "Rate limited": "限流",
+  "Abnormal": "异常",
+  "Disabled": "禁用",
   "正常": "正常",
   "限流": "限流",
   "异常": "异常",
@@ -410,10 +410,10 @@ export function mapRefreshProgressResponseToFE(res: any): RefreshProgressRespons
   const mapped = { ...res };
   if (mapped.status_counts) {
     mapped.status_counts = {
-      "bình thường": mapped.status_counts["正常"] || mapped.status_counts["bình thường"] || 0,
-      "Giới hạn hiện tại": mapped.status_counts["限流"] || mapped.status_counts["Giới hạn hiện tại"] || 0,
-      "bất thường": mapped.status_counts["异常"] || mapped.status_counts["bất thường"] || 0,
-      "Vô hiệu hóa": mapped.status_counts["禁用"] || mapped.status_counts["Vô hiệu hóa"] || 0,
+      "Normal": mapped.status_counts["正常"] || mapped.status_counts["Normal"] || 0,
+      "Rate limited": mapped.status_counts["限流"] || mapped.status_counts["Rate limited"] || 0,
+      "Abnormal": mapped.status_counts["异常"] || mapped.status_counts["Abnormal"] || 0,
+      "Disabled": mapped.status_counts["禁用"] || mapped.status_counts["Disabled"] || 0,
     };
   }
   if (mapped.result) {
@@ -500,10 +500,10 @@ export async function deleteAccounts(tokens: string[]) {
   return mapAccountMutationResponseToFE(res);
 }
 
-export async function refreshAccounts(accessTokens: string[]) {
+export async function refreshAccounts(accesstokenss: string[]) {
   return httpRequest<{ progress_id: string }>("/api/accounts/refresh", {
     method: "POST",
-    body: { access_tokens: accessTokens },
+    body: { access_tokens: accesstokenss },
   });
 }
 
@@ -512,10 +512,10 @@ export async function fetchRefreshProgress(progressId: string) {
   return mapRefreshProgressResponseToFE(res);
 }
 
-export async function reLoginAccounts(accessTokens: string[]) {
+export async function reLoginAccounts(accesstokenss: string[]) {
   return httpRequest<{ progress_id: string }>("/api/accounts/re-login", {
     method: "POST",
-    body: { access_tokens: accessTokens },
+    body: { access_tokens: accesstokenss },
   });
 }
 
@@ -525,7 +525,7 @@ export async function fetchReLoginProgress(progressId: string) {
 }
 
 export async function updateAccount(
-  accessToken: string,
+  accesstokens: string,
   updates: {
     type?: AccountType;
     status?: AccountStatus;
@@ -540,7 +540,7 @@ export async function updateAccount(
   const res = await httpRequest<AccountUpdateResponse>("/api/accounts/update", {
     method: "POST",
     body: {
-      access_token: accessToken,
+      access_token: accesstokens,
       ...mappedUpdates,
     },
   });

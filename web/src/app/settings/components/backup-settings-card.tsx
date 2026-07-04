@@ -64,15 +64,15 @@ function getFilenameFromContentDisposition(value: string | null) {
 }
 
 const includeLabels: Array<{ key: keyof BackupInclude; label: string }> = [
-  { key: "config", label: "Cấu hình hệ thống" },
-  { key: "register", label: "Đăng ký cấu hình" },
-  { key: "cpa", label: "Cấu hình CPA" },
-  { key: "sub2api", label: "Cấu hình Sub2API" },
-  { key: "logs", label: "Lập kế hoạch và nhật ký cuộc gọi" },
-  { key: "image_tasks", label: "Bản ghi nhiệm vụ hình ảnh" },
-  { key: "accounts_snapshot", label: "Ảnh chụp nhanh tài khoản" },
-  { key: "auth_keys_snapshot", label: "Ảnh chụp nhanh khóa người dùng" },
-  { key: "images", label: "Thư mục tập tin hình ảnh" },
+  { key: "config", label: "System Configuration" },
+  { key: "register", label: "Registration Configuration" },
+  { key: "cpa", label: "CPA Configuration" },
+  { key: "sub2api", label: "Sub2API Configuration" },
+  { key: "logs", label: "Schedules and Call Logs" },
+  { key: "image_tasks", label: "Image Task Records" },
+  { key: "accounts_snapshot", label: "Account Snapshot" },
+  { key: "auth_keys_snapshot", label: "User Keys Snapshot" },
+  { key: "images", label: "Image File Directory" },
 ];
 
 export function BackupSettingsCard() {
@@ -119,7 +119,7 @@ export function BackupSettingsCard() {
       setDetail(data.item);
     } catch (error) {
       setDetail(null);
-      toast.error(error instanceof Error ? error.message : "Không đọc được chi tiết sao lưu");
+      toast.error(error instanceof Error ? error.message : "Failed to read backup details");
     } finally {
       setDetailLoading(false);
     }
@@ -129,7 +129,7 @@ export function BackupSettingsCard() {
     try {
       const authKey = await getStoredAuthKey();
       if (!authKey) {
-        toast.error("Trạng thái đăng nhập hiện tại đã hết hạn, vui lòng đăng nhập lại trước khi tải xuống.");
+        toast.error("Current login session has expired. Please log in again before downloading.");
         return;
       }
       const response = await fetch(`${webConfig.apiUrl.replace(/\/$/, "")}${getBackupDownloadUrl(key)}`, {
@@ -138,12 +138,12 @@ export function BackupSettingsCard() {
         },
       });
       if (!response.ok) {
-        let message = "Không tải được bản sao lưu xuống";
+        let message = "Failed to download backup";
         try {
           const data = await response.json() as { detail?: { error?: string }; error?: string; message?: string };
           message = data.detail?.error || data.error || data.message || message;
         } catch {
-          message = response.status === 401 ? "Đăng nhập đã hết hạn, vui lòng đăng nhập lại và thử lại" : message;
+          message = response.status === 401 ? "Login expired. Please log in again and retry." : message;
         }
         throw new Error(message);
       }
@@ -157,9 +157,9 @@ export function BackupSettingsCard() {
       anchor.click();
       anchor.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Quá trình tải xuống bản sao lưu đã bắt đầu");
+      toast.success("Backup download started");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Không tải được bản sao lưu xuống");
+      toast.error(error instanceof Error ? error.message : "Failed to download backup");
     }
   };
 
@@ -173,19 +173,19 @@ export function BackupSettingsCard() {
                 <CloudUpload className="size-5 text-stone-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold tracking-tight">Quản lý sao lưu R2</h2>
-                <p className="text-sm text-stone-500">Sao lưu dữ liệu quan trọng thường xuyên vào Cloudflare R2, hỗ trợ mã hóa, xoay vòng, thực thi thủ công và dọn dẹp lịch sử tùy chọn.</p>
+                <h2 className="text-lg font-semibold tracking-tight">R2 Backup Manager</h2>
+                <p className="text-sm text-stone-500">Regularly backup important data to Cloudflare R2; supports encryption, rotation, manual execution, and optional history cleanup.</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant={backupState?.running ? "warning" : backupState?.last_status === "success" ? "success" : "secondary"} className="rounded-md">
-                {backupState?.running ? "Đang sao lưu" : backupState?.last_status === "success" ? "thành công gần đây" : backupState?.last_status === "error" ? "thất bại gần đây" : "Không được thực thi"}
+                {backupState?.running ? "Backing up" : backupState?.last_status === "success" ? "recently succeeded" : backupState?.last_status === "error" ? "recently failed" : "Not executed"}
               </Badge>
             </div>
           </div>
 
           <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-600">
-            Tài khoản và khóa người dùng sẽ được xuất từ phụ trợ lưu trữ hiện tại sang ảnh chụp nhanh hợp lý.，Không dựa vào lớp dưới cùng là `json`、`sqlite`、`postgres` Vẫn `git`。Thư mục ảnh mặc định không được sao lưu，Tránh sao lưu quá lớn。
+            Accounts and User Keys will be exported from the active storage backend into a logical snapshot (independent of whether the underlying storage is JSON, SQLite, Postgres, or Git). The default image directory is not backed up to prevent bloated backups.
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -194,14 +194,14 @@ export function BackupSettingsCard() {
                 checked={Boolean(backup.enabled)}
                 onCheckedChange={(checked) => setBackupField("enabled", Boolean(checked))}
               />
-              Bật sao lưu theo lịch trình
+              Enable scheduled backup
             </label>
             <label className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
               <Checkbox
                 checked={Boolean(backup.encrypt)}
                 onCheckedChange={(checked) => setBackupField("encrypt", Boolean(checked))}
               />
-              Kích hoạt mã hóa sao lưu
+              Enable backup encryption
             </label>
 
           <div className="space-y-2">
@@ -209,7 +209,7 @@ export function BackupSettingsCard() {
             <Input value={String(backup.account_id || "")} onChange={(event) => setBackupField("account_id", event.target.value)} className="h-10 rounded-xl border-stone-200 bg-white" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Tên nhóm</label>
+            <label className="text-sm text-stone-700">Bucket Name</label>
             <Input value={String(backup.bucket || "")} onChange={(event) => setBackupField("bucket", event.target.value)} className="h-10 rounded-xl border-stone-200 bg-white" />
           </div>
 
@@ -223,32 +223,32 @@ export function BackupSettingsCard() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">tiền tố dự phòng</label>
+            <label className="text-sm text-stone-700">Backup Prefix</label>
             <Input value={String(backup.prefix || "")} onChange={(event) => setBackupField("prefix", event.target.value)} placeholder="backups" className="h-10 rounded-xl border-stone-200 bg-white" />
             <p className="text-xs text-stone-500">Tiền tố đối tượng trong R2, chẳng hạn như `backups/prod`.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Khoảng thời gian sao lưu dự kiến</label>
+            <label className="text-sm text-stone-700">Scheduled Backup Interval</label>
             <Input value={String(backup.interval_minutes || "")} onChange={(event) => setBackupField("interval_minutes", event.target.value)} placeholder="360" className="h-10 rounded-xl border-stone-200 bg-white" />
             <p className="text-xs text-stone-500">Đơn vị là phút. Sau khi dịch vụ được khởi động, nó sẽ tự động được thăm dò và thực thi trong khoảng thời gian này.</p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Số lượng bản sao lưu cần giữ</label>
+            <label className="text-sm text-stone-700">Backup Retention Count</label>
             <Input value={String(backup.rotation_keep || "")} onChange={(event) => setBackupField("rotation_keep", event.target.value)} placeholder="10" className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Các bản sao lưu cũ hơn sẽ tự động bị xóa sau khi tải lên thành công. Điền vào `0` để biểu thị không có chế độ xoay tự động.</p>
+            <p className="text-xs text-stone-500">Các bản Backup cũ hơn sẽ tự động bị xóa sau khi tải lên thành công. Điền vào `0` để biểu thị không có chế độ xoay tự động.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">mật khẩu được mã hóa</label>
-            <Input type="password" value={String(backup.passphrase || "")} onChange={(event) => setBackupField("passphrase", event.target.value)} placeholder={backup.encrypt ? "Cần thiết sau khi kích hoạt mã hóa" : "Để trống"} className="h-10 rounded-xl border-stone-200 bg-white" />
-            <p className="text-xs text-stone-500">Chỉ được sử dụng khi bật mã hóa. Vui lòng giữ nó đúng cách, nếu không nội dung sao lưu sẽ không thể được giải mã.</p>
+            <label className="text-sm text-stone-700">Encryption Passphrase</label>
+            <Input type="password" value={String(backup.passphrase || "")} onChange={(event) => setBackupField("passphrase", event.target.value)} placeholder={backup.encrypt ? "Required after enabling encryption" : "Leave blank"} className="h-10 rounded-xl border-stone-200 bg-white" />
+            <p className="text-xs text-stone-500">Chỉ được sử dụng khi bật mã hóa. Vui lòng giữ nó đúng cách, nếu không nội dung Backup sẽ không thể được giải mã.</p>
           </div>
           </div>
 
           <div className="space-y-3 rounded-xl border border-stone-200 bg-white px-4 py-4">
           <div>
-            <div className="text-sm font-medium text-stone-800">Sao lưu nội dung</div>
-            <p className="mt-1 text-xs text-stone-500">Chọn dữ liệu cần đưa vào gói sao lưu theo thành phần.</p>
+            <div className="text-sm font-medium text-stone-800">Backup Content</div>
+            <p className="mt-1 text-xs text-stone-500">Chọn dữ liệu cần đưa vào gói Backup theo thành phần.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             {includeLabels.map((item) => (
@@ -265,20 +265,20 @@ export function BackupSettingsCard() {
 
           <div className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-600 md:grid-cols-3">
           <div>
-            <div className="text-xs text-stone-500">Bắt đầu gần đây</div>
+            <div className="text-xs text-stone-500">Last Started</div>
             <div className="mt-1 font-medium text-stone-800">{formatDateTime(backupState?.last_started_at)}</div>
           </div>
           <div>
-            <div className="text-xs text-stone-500">vừa hoàn thành</div>
+            <div className="text-xs text-stone-500">Last Completed</div>
             <div className="mt-1 font-medium text-stone-800">{formatDateTime(backupState?.last_finished_at)}</div>
           </div>
           <div>
-            <div className="text-xs text-stone-500">đối tượng gần đây</div>
+            <div className="text-xs text-stone-500">Last Object Key</div>
             <div className="mt-1 break-all font-medium text-stone-800">{backupState?.last_object_key || "—"}</div>
           </div>
           {backupState?.last_error ? (
             <div className="md:col-span-3">
-              <div className="text-xs text-rose-500">lỗi gần đây</div>
+              <div className="text-xs text-rose-500">Last Error</div>
               <div className="mt-1 break-all rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700">{backupState.last_error}</div>
             </div>
           ) : null}
@@ -287,27 +287,27 @@ export function BackupSettingsCard() {
           <div className="flex flex-wrap justify-end gap-2">
           <Button type="button" variant="outline" className="h-9 rounded-xl border-stone-200 bg-white px-4 text-stone-700" onClick={() => void testBackup()} disabled={isTestingBackup}>
             {isTestingBackup ? <LoaderCircle className="size-4 animate-spin" /> : <Shield className="size-4" />}
-            kết nối thử nghiệm
+            Test Connection
           </Button>
           <Button type="button" variant="outline" className="h-9 rounded-xl border-stone-200 bg-white px-4 text-stone-700" onClick={() => void loadBackups()} disabled={isLoadingBackups}>
             {isLoadingBackups ? <LoaderCircle className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
-            Làm mới danh sách
+            Refresh List
           </Button>
           <Button type="button" variant="outline" className="h-9 rounded-xl border-stone-200 bg-white px-4 text-stone-700" onClick={() => void runBackup()} disabled={isRunningBackup || Boolean(backupState?.running)}>
             {isRunningBackup || backupState?.running ? <LoaderCircle className="size-4 animate-spin" /> : <Play className="size-4" />}
-            Sao lưu ngay bây giờ
+            Backup Now
           </Button>
           <Button className="h-9 rounded-xl bg-stone-950 px-4 text-white hover:bg-stone-800" onClick={() => void saveConfig()} disabled={isSavingConfig}>
             {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <CloudUpload className="size-4" />}
-            Lưu cấu hình
+            Save Configuration
           </Button>
           </div>
 
           <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-medium text-stone-800">Sao lưu lịch sử</h3>
-              <p className="text-xs text-stone-500">Hỗ trợ xem thông tin đối tượng và xóa trực tiếp các bản sao lưu từ xa.</p>
+              <h3 className="text-sm font-medium text-stone-800">Backup History</h3>
+              <p className="text-xs text-stone-500">View object details and delete remote backups directly.</p>
             </div>
           </div>
 
@@ -317,7 +317,7 @@ export function BackupSettingsCard() {
             </div>
           ) : backups.length === 0 ? (
             <div className="rounded-xl bg-stone-50 px-6 py-10 text-center text-sm text-stone-500">
-              Chưa có bản ghi sao lưu từ xa nào。Nó sẽ xuất hiện ở đây sau khi lưu cấu hình và thực hiện sao lưu thủ công。
+              Chưa có bản ghi Backup từ xa nào。Nó sẽ xuất hiện ở đây sau khi lưu cấu hình và thực hiện Backup thủ công。
             </div>
           ) : (
             <div className="space-y-3">
@@ -332,7 +332,7 @@ export function BackupSettingsCard() {
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">
                         <span>kích thước {formatBytes(item.size)}</span>
-                        <span>Thời gian cập nhật {formatDateTime(item.updated_at)}</span>
+                        <span>Time cập nhật {formatDateTime(item.updated_at)}</span>
                         <span className="break-all">đối tượng key {item.key}</span>
                       </div>
                     </div>
@@ -345,11 +345,11 @@ export function BackupSettingsCard() {
                         onClick={() => void handleDownload(item.key, item.name)}
                       >
                         <Download className="size-4" />
-                        Tải xuống
+                        Download
                       </Button>
                       <Button type="button" variant="outline" className="h-9 rounded-xl border-stone-200 bg-white px-4 text-stone-700" onClick={() => void handleOpenDetail(item.key)}>
                         <Eye className="size-4" />
-                        Xem chi tiết
+                        View chi tiết
                       </Button>
                       <Button
                         type="button"
@@ -359,7 +359,7 @@ export function BackupSettingsCard() {
                         disabled={isDeleting}
                       >
                         {isDeleting ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                        Xóa
+                        Delete
                       </Button>
                     </div>
                   </div>
@@ -374,7 +374,7 @@ export function BackupSettingsCard() {
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col overflow-hidden rounded-2xl border-white/80 bg-white">
           <DialogHeader className="shrink-0 border-b border-stone-200 pb-3">
-            <DialogTitle>Chi tiết sao lưu</DialogTitle>
+            <DialogTitle>Details Backup</DialogTitle>
           </DialogHeader>
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
             {detailLoading ? (
@@ -383,7 +383,7 @@ export function BackupSettingsCard() {
               </div>
             ) : !detail ? (
               <div className="rounded-xl bg-stone-50 px-6 py-10 text-center text-sm text-stone-500">
-                Không thể đọc chi tiết sao lưu vào lúc này；Nếu đây là bản sao lưu được mã hóa，Vui lòng xác nhận rằng mật khẩu mã hóa chính xác đã được điền và lưu cấu hình trước。
+                Không thể đọc chi tiết Backup vào lúc này；Nếu đây là bản Backup được mã hóa，Vui lòng xác nhận rằng mật khẩu mã hóa chính xác đã được điền và lưu cấu hình trước。
               </div>
             ) : (
               <>

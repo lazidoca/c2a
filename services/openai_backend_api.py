@@ -63,7 +63,7 @@ DEFAULT_CLIENT_VERSION = "prod-497f333866796e100096ad083b51ca949d22e751"
 DEFAULT_CLIENT_BUILD_NUMBER = "7646290"
 DEFAULT_POW_SCRIPT = "https://chatgpt.com/backend-api/sentinel/sdk.js"
 CODEX_IMAGE_MODEL = "codex-gpt-image-2"
-CODEX_RESPONSES_MODEL = "gpt-5.5"
+CODEX_RESPONSES_MODEL = "gpt-5-5"
 SEARCH_MODEL = "gpt-5-5"
 SEARCH_TIMEOUT_SECS = 300.0
 SEARCH_POLL_INTERVAL_SECS = 3.0
@@ -235,12 +235,13 @@ class OpenAIBackendAPI:
 
     def _get_timezone_and_offset(self) -> tuple[str, int]:
         """Get the current system's local timezone and timezone offset in minutes (following JavaScript format)."""
+        default_tz = "Asia/Singapore" if self.access_token else "America/Los_Angeles"
         try:
             if tzlocal is None:
                 raise ImportError("tzlocal is not available")
             tz_name = tzlocal.get_localzone_name()
         except Exception:
-            tz_name = "Asia/Singapore" if self.access_token else "America/Los_Angeles"
+            tz_name = default_tz
 
         try:
             tz = zoneinfo.ZoneInfo(tz_name)
@@ -248,10 +249,17 @@ class OpenAIBackendAPI:
             offset_seconds = dt.utcoffset().total_seconds()
             offset_min = int(-offset_seconds / 60)
         except Exception:
-            if tz_name == "America/Los_Angeles":
-                offset_min = 480
-            else:
-                offset_min = -480
+            tz_name = default_tz
+            try:
+                tz = zoneinfo.ZoneInfo(tz_name)
+                dt = datetime.datetime.now(tz)
+                offset_seconds = dt.utcoffset().total_seconds()
+                offset_min = int(-offset_seconds / 60)
+            except Exception:
+                if tz_name == "America/Los_Angeles":
+                    offset_min = 480
+                else:
+                    offset_min = -480
         return tz_name, offset_min
 
     def _get_offset_for_timezone(self, tz_name: str) -> int:
@@ -561,10 +569,11 @@ class OpenAIBackendAPI:
     ) -> Dict[str, Any]:
         """Constructs web conversation request body from standard messages."""
         tz_offset = self._get_offset_for_timezone(timezone)
+        web_model = self._resolve_conversation_model(model)
         payload = {
             "action": "next",
             "messages": self._api_messages_to_conversation_messages(messages),
-            "model": model,
+            "model": web_model,
             "parent_message_id": new_uuid(),
             "conversation_mode": {"kind": "primary_assistant"},
             "conversation_origin": None,
@@ -595,6 +604,36 @@ class OpenAIBackendAPI:
         if normalized_effort:
             payload["thinking_effort"] = normalized_effort
         return payload
+
+    # Mapping from OpenAI API model slugs (sent by Codex CLI and other API clients)
+    # to the corresponding ChatGPT web model slugs accepted by /backend-api/conversation.
+    # Unmapped slugs pass through as-is (they may already be valid web slugs).
+    _API_TO_WEB_MODEL: Dict[str, str] = {
+        # Codex / coding models
+        "codex-mini-latest": "gpt-5-codex-mini",
+        "codex-mini": "gpt-5-codex-mini",
+        "o3-mini": "o3-mini",
+        "o3": "o3",
+        "o4-mini": "o4-mini",
+        # GPT-4.1 family
+        "gpt-4.1": "gpt-4.1",
+        "gpt-4.1-mini": "gpt-4.1-mini",
+        "gpt-4.1-nano": "gpt-4.1-nano",
+        # GPT-4o family
+        "gpt-4o": "gpt-4o",
+        "gpt-4o-mini": "gpt-4o-mini",
+        # GPT-5 family (API alias → web slug)
+        "gpt-5": "gpt-5",
+        "gpt-5-mini": "gpt-5-mini",
+    }
+
+    @classmethod
+    def _resolve_conversation_model(cls, model: str) -> str:
+        """Translate an OpenAI API model slug to the web model slug expected by
+        /backend-api/conversation.  Unknown slugs are returned unchanged so that
+        native web slugs (e.g. gpt-5-5, auto) continue to work."""
+        normalized = str(model or "auto").strip() or "auto"
+        return cls._API_TO_WEB_MODEL.get(normalized, normalized)
 
     def _image_model_slug(self, model: str) -> str:
         """Maps standard image model names to the underlying model slug."""

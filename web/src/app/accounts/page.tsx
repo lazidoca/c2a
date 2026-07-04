@@ -64,11 +64,11 @@ import { cn } from "@/lib/utils";
 import { AccountImportDialog } from "./components/account-import-dialog";
 
 const accountStatusOptions: { label: string; value: AccountStatus | "all" }[] = [
-  { label: "Tất cả trạng thái", value: "all" },
-  { label: "bình thường", value: "bình thường" },
-  { label: "Giới hạn hiện tại", value: "Giới hạn hiện tại" },
-  { label: "bất thường", value: "bất thường" },
-  { label: "Vô hiệu hóa", value: "Vô hiệu hóa" },
+  { label: "All statuses", value: "all" },
+  { label: "Normal", value: "Normal" },
+  { label: "Rate limited", value: "Rate limited" },
+  { label: "Abnormal", value: "Abnormal" },
+  { label: "Disabled", value: "Disabled" },
 ];
 
 const statusMeta: Record<
@@ -78,19 +78,19 @@ const statusMeta: Record<
     badge: ComponentProps<typeof Badge>["variant"];
   }
 > = {
-  "bình thường": { icon: CheckCircle2, badge: "success" },
-  "Giới hạn hiện tại": { icon: CircleAlert, badge: "warning" },
-  "bất thường": { icon: CircleOff, badge: "danger" },
-  "Vô hiệu hóa": { icon: Ban, badge: "secondary" },
+  "Normal": { icon: CheckCircle2, badge: "success" },
+  "Rate limited": { icon: CircleAlert, badge: "warning" },
+  "Abnormal": { icon: CircleOff, badge: "danger" },
+  "Disabled": { icon: Ban, badge: "secondary" },
 };
 
 const metricCards = [
-  { key: "total", label: "Tổng tài khoản", color: "text-stone-900", icon: UserRound },
-  { key: "active", label: "Tài khoản bình thường", color: "text-emerald-600", icon: CheckCircle2 },
-  { key: "limited", label: "Tài khoản giới hạn hiện tại", color: "text-orange-500", icon: CircleAlert },
-  { key: "abnormal", label: "Tài khoản bất thường", color: "text-rose-500", icon: CircleOff },
-  { key: "disabled", label: "Vô hiệu hóa tài khoản", color: "text-stone-500", icon: Ban },
-  { key: "quota", label: "số dư còn lại", color: "text-blue-500", icon: RefreshCw },
+  { key: "total", label: "Total accounts", color: "text-stone-900", icon: UserRound },
+  { key: "active", label: "Normal accounts", color: "text-emerald-600", icon: CheckCircle2 },
+  { key: "limited", label: "Rate limited accounts", color: "text-orange-500", icon: CircleAlert },
+  { key: "abnormal", label: "Abnormal accounts", color: "text-rose-500", icon: CircleOff },
+  { key: "disabled", label: "Disabled accounts", color: "text-stone-500", icon: Ban },
+  { key: "quota", label: "Remaining balance", color: "text-blue-500", icon: RefreshCw },
 ] as const;
 
 function isUnlimitedImageQuotaAccount(account: Account) {
@@ -113,7 +113,7 @@ function formatQuota(account: Account) {
     return "∞";
   }
   if (imageQuotaUnknown(account)) {
-    return "không rõ";
+    return "Unknown";
   }
   return String(Math.max(0, account.quota));
 }
@@ -132,7 +132,7 @@ function formatRestoreAt(value?: string | null) {
   const totalHours = Math.ceil(diffMs / (1000 * 60 * 60));
   const days = Math.floor(totalHours / 24);
   const hours = totalHours % 24;
-  const relative = diffMs > 0 ? `Còn lại ${days}d ${hours}h` : "Thời khắc phục hồi đã đến";
+  const relative = diffMs > 0 ? `Remaining ${days}d ${hours}h` : "Recovery time reached";
 
   const pad = (num: number) => String(num).padStart(2, "0");
   const absolute = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(
@@ -143,23 +143,23 @@ function formatRestoreAt(value?: string | null) {
 }
 
 function formatQuotaSummary(accounts: Account[]) {
-  const availableAccounts = accounts.filter((account) => account.status === "bình thường");
+  const availableAccounts = accounts.filter((account) => account.status === "Normal");
   if (availableAccounts.some(isUnlimitedImageQuotaAccount)) {
     return "∞";
   }
   if (availableAccounts.some(imageQuotaUnknown)) {
-    return "không rõ";
+    return "Unknown";
   }
   return formatCompact(availableAccounts.reduce((sum, account) => sum + Math.max(0, account.quota), 0));
 }
 
-function maskToken(token?: string) {
+function masktokens(token?: string) {
   if (!token) return "—";
   if (token.length <= 18) return token;
   return `${token.slice(0, 16)}...${token.slice(-8)}`;
 }
 
-function downloadTokens(accounts: Account[]) {
+function downloadtokenss(accounts: Account[]) {
   const content = `${accounts.map((account) => account.access_token).join("\n")}\n`;
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -196,13 +196,13 @@ function AccountsPageContent() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState("10");
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
-  const [editStatus, setEditStatus] = useState<AccountStatus>("bình thường");
+  const [editStatus, setEditStatus] = useState<AccountStatus>("Normal");
   const [editProxy, setEditProxy] = useState("");
   const [isTestingProxy, setIsTestingProxy] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshingTokens, setRefreshingTokens] = useState<Set<string>>(new Set());
+  const [refreshingtokenss, setRefreshingtokenss] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRelogining, setIsRelogining] = useState(false);
@@ -231,7 +231,7 @@ function AccountsPageContent() {
       setAccounts(data.items);
       setSelectedIds((prev) => prev.filter((id) => data.items.some((item) => item.access_token === id)));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không thể tải tài khoản";
+      const message = error instanceof Error ? error.message : "Failed to load accounts";
       toast.error(message);
     } finally {
       if (!silent) {
@@ -246,7 +246,7 @@ function AccountsPageContent() {
       const data = await fetchModels();
       setAvailableModels(Array.isArray(data.data) ? data.data : []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không tải được danh sách mô hình";
+      const message = error instanceof Error ? error.message : "Failed to load model list";
       toast.error(message);
     } finally {
       setIsLoadingModels(false);
@@ -261,7 +261,7 @@ function AccountsPageContent() {
     void loadAccounts();
     void loadModels();
 
-    // Xóa bộ đếm thời gian trên thanh tiến trình
+    // Clear progress bar timer on unmount
     return () => {
       if (progressRef.current) clearInterval(progressRef.current);
     };
@@ -287,10 +287,10 @@ function AccountsPageContent() {
 
   const summary = useMemo(() => {
     const total = accounts.length;
-    const active = accounts.filter((item) => item.status === "bình thường").length;
-    const limited = accounts.filter((item) => item.status === "Giới hạn hiện tại").length;
-    const abnormal = accounts.filter((item) => item.status === "bất thường").length;
-    const disabled = accounts.filter((item) => item.status === "Vô hiệu hóa").length;
+    const active = accounts.filter((item) => item.status === "Normal").length;
+    const limited = accounts.filter((item) => item.status === "Rate limited").length;
+    const abnormal = accounts.filter((item) => item.status === "Abnormal").length;
+    const disabled = accounts.filter((item) => item.status === "Disabled").length;
     const quota = formatQuotaSummary(accounts);
 
     return { total, active, limited, abnormal, disabled, quota };
@@ -298,19 +298,19 @@ function AccountsPageContent() {
 
   const accountTypeOptions = useMemo(
     () => [
-      { label: "Tất cả các loại", value: "all" },
+      { label: "All types", value: "all" },
       ...Array.from(new Set(accounts.map(displayAccountType))).map((type) => ({ label: type, value: type })),
     ],
     [accounts],
   );
 
-  const selectedTokens = useMemo(() => {
+  const selectedtokenss = useMemo(() => {
     const selectedSet = new Set(selectedIds);
     return accounts.filter((item) => selectedSet.has(item.access_token)).map((item) => item.access_token);
   }, [accounts, selectedIds]);
 
-  const abnormalTokens = useMemo(() => {
-    return accounts.filter((item) => item.status === "bất thường").map((item) => item.access_token);
+  const abnormaltokenss = useMemo(() => {
+    return accounts.filter((item) => item.status === "Abnormal").map((item) => item.access_token);
   }, [accounts]);
 
   const paginationItems = useMemo(() => {
@@ -327,9 +327,9 @@ function AccountsPageContent() {
     return items;
   }, [pageCount, safePage]);
 
-  const handleDeleteTokens = async (tokens: string[]) => {
+  const handleDeletetokenss = async (tokens: string[]) => {
     if (tokens.length === 0) {
-      toast.error("Vui lòng chọn tài khoản bạn muốn xóa trước");
+      toast.error("Please select the accounts you want to delete first");
       return;
     }
 
@@ -338,26 +338,26 @@ function AccountsPageContent() {
       const data = await deleteAccounts(tokens);
       setAccounts(data.items);
       setSelectedIds((prev) => prev.filter((id) => data.items.some((item) => item.access_token === id)));
-      toast.success(`Đã xóa ${data.removed ?? 0} tài khoản`);
+      toast.success(`Deleted ${data.removed ?? 0} accounts`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không thể xóa tài khoản";
+      const message = error instanceof Error ? error.message : "Failed to delete accounts";
       toast.error(message);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleRefreshAccounts = async (accessTokens: string[]) => {
-    if (accessTokens.length === 0) {
-      toast.error("Không có tài khoản nào cần được làm mới");
+  const handleRefreshAccounts = async (accesstokenss: string[]) => {
+    if (accesstokenss.length === 0) {
+      toast.error("No accounts need to be refreshed");
       return;
     }
 
-    if (accessTokens.length === 1) {
-      setRefreshingTokens((prev) => new Set([...prev, accessTokens[0]]));
+    if (accesstokenss.length === 1) {
+      setRefreshingtokenss((prev) => new Set([...prev, accesstokenss[0]]));
       try {
-        const { progress_id } = await refreshAccounts(accessTokens);
-        // Tài khoản đơn：Bỏ phiếu chờ hoàn thành
+        const { progress_id } = await refreshAccounts(accesstokenss);
+        // Single account: poll until complete
         await pollRefreshProgress(progress_id, (progress) => {
           if (progress.done && progress.result) {
             setAccounts(progress.result.items);
@@ -365,12 +365,12 @@ function AccountsPageContent() {
           }
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Không thể làm mới tài khoản";
+        const message = error instanceof Error ? error.message : "Failed to refresh accounts";
         toast.error(message);
       } finally {
-        setRefreshingTokens((prev) => {
+        setRefreshingtokenss((prev) => {
           const next = new Set(prev);
-          next.delete(accessTokens[0]);
+          next.delete(accesstokenss[0]);
           return next;
         });
       }
@@ -379,32 +379,32 @@ function AccountsPageContent() {
 
     setIsRefreshing(true);
 
-    // Tính toán cơ sở của các tài khoản không được chọn（Liên kết thẻ thống kê）
-    const selectedTokenSet = new Set(accessTokens);
-    const baseAccountsList = accounts.filter((a) => !selectedTokenSet.has(a.access_token));
-    const baseActive = baseAccountsList.filter((a) => a.status === "bình thường").length;
-    const baseLimited = baseAccountsList.filter((a) => a.status === "Giới hạn hiện tại").length;
-    const baseAbnormal = baseAccountsList.filter((a) => a.status === "bất thường").length;
-    const baseDisabled = baseAccountsList.filter((a) => a.status === "Vô hiệu hóa").length;
-    const baseNormalAccounts = baseAccountsList.filter((a) => a.status === "bình thường");
+    // Compute base for unselected accounts (stats card link)
+    const selectedtokensSet = new Set(accesstokenss);
+    const baseAccountsList = accounts.filter((a) => !selectedtokensSet.has(a.access_token));
+    const baseActive = baseAccountsList.filter((a) => a.status === "Normal").length;
+    const baseLimited = baseAccountsList.filter((a) => a.status === "Rate limited").length;
+    const baseAbnormal = baseAccountsList.filter((a) => a.status === "Abnormal").length;
+    const baseDisabled = baseAccountsList.filter((a) => a.status === "Disabled").length;
+    const baseNormalAccounts = baseAccountsList.filter((a) => a.status === "Normal");
     const baseHasUnlimited = baseNormalAccounts.some(isUnlimitedImageQuotaAccount);
     const baseHasUnknown = baseNormalAccounts.some(imageQuotaUnknown);
     const baseQuotaNum = baseNormalAccounts.reduce((s, a) => s + Math.max(0, a.quota), 0);
 
-    // Hiển thị thanh tiến trình（Chỉ hiển thị các nhiệm vụ hiện tại，Không bao gồm thống kê phân loại）
-    const total = accessTokens.length;
+    // Show progress bar (current tasks only, no category stats)
+    const total = accesstokenss.length;
     setProgress({
       visible: true,
       current: 0,
       total,
-      message: "Đang làm mới thông tin tài khoản...",
+      message: "Refreshing account info...",
       email: "",
     });
 
     try {
-      const { progress_id } = await refreshAccounts(accessTokens);
+      const { progress_id } = await refreshAccounts(accesstokenss);
 
-      // Tiến trình thăm dò ý kiến ​​đến khi hoàn thành
+      // Poll progress until complete
       const data = await new Promise<AccountRefreshResponse>((resolve, reject) => {
         const pollTimer = setInterval(async () => {
           try {
@@ -416,34 +416,33 @@ function AccountsPageContent() {
                 return;
               }
               if (!p.result) {
-                reject(new Error("Kết quả làm mới trống"));
+                reject(new Error("Refresh result is empty"));
                 return;
               }
-              // Cập nhật hiển thị tiến độ cuối cùng
+              // Update final progress display
               setProgress((prev) => ({
                 ...prev,
                 current: prev.total,
-                message: "Làm mới hoàn tất",
+                message: "Refresh completed",
               }));
-              // Thống kê liên kết rõ ràng
-              setRefreshSummary(null);
+              // Clear linked stats              setRefreshSummary(null);
               resolve(p.result);
             } else {
-              // Cập nhật tiến độ theo thời gian thực
+              // Update progress in real time
               setProgress((prev) => ({
                 ...prev,
                 current: p.processed,
               }));
-              // Cập nhật thẻ thống kê theo thời gian thực：Hồng y + Kết quả tích lũy được làm mới
-              const runningActive = baseActive + ((p.status_counts?.["bình thường"]) ?? 0);
-              const runningLimited = baseLimited + ((p.status_counts?.["Giới hạn hiện tại"]) ?? 0);
-              const runningAbnormal = baseAbnormal + ((p.status_counts?.["bất thường"]) ?? 0);
-              const runningDisabled = baseDisabled + ((p.status_counts?.["Vô hiệu hóa"]) ?? 0);
+              // Update stats cards in real time: base + cumulative refresh results
+              const runningActive = baseActive + ((p.status_counts?.["Normal"]) ?? 0);
+              const runningLimited = baseLimited + ((p.status_counts?.["Rate limited"]) ?? 0);
+              const runningAbnormal = baseAbnormal + ((p.status_counts?.["Abnormal"]) ?? 0);
+              const runningDisabled = baseDisabled + ((p.status_counts?.["Disabled"]) ?? 0);
               let runningQuota: string | number;
               if (baseHasUnlimited) {
                 runningQuota = "∞";
               } else if (baseHasUnknown) {
-                runningQuota = "không rõ";
+                runningQuota = "Unknown";
               } else {
                 runningQuota = formatCompact(baseQuotaNum + (p.total_quota ?? 0));
               }
@@ -463,22 +462,22 @@ function AccountsPageContent() {
         }, 300);
       });
 
-      // Làm mới hoàn tất，Cập nhật dữ liệu
+      // Refresh completed, update data
       setAccounts(data.items);
       setSelectedIds((prev) => prev.filter((id) => data.items.some((item) => item.access_token === id)));
 
       const relogined = data.relogined ?? 0;
 
-      // Hiển thị tiến trình đăng nhập lại
+      // Show re-login progress
       if (relogined > 0) {
         setProgress({
           visible: true,
           current: 0,
           total: relogined,
-          message: `Đang cố gắng xóa tài khoản ${relogined} có trạng thái ngoại lệ`,
+          message: `Attempting to re-login ${relogined} abnormal accounts`,
           email: "",
         });
-        // Mô phỏng tiến trình đăng nhập lại
+        // Simulate re-login progress
         let reCount = 0;
         await new Promise<void>((resolve) => {
           const timer = setInterval(() => {
@@ -489,7 +488,7 @@ function AccountsPageContent() {
                 visible: true,
                 current: relogined,
                 total: relogined,
-                message: "Đã hoàn tất việc xóa ngoại lệ",
+                message: "Completed clearing exceptions",
                 email: "",
               });
               setTimeout(() => setProgress({ visible: false, current: 0, total: 0, message: "", email: "" }), 800);
@@ -505,7 +504,7 @@ function AccountsPageContent() {
           visible: true,
           current: total,
           total,
-          message: "Làm mới hoàn tất",
+          message: "Refresh completed",
           email: "",
         });
         setTimeout(() => setProgress({ visible: false, current: 0, total: 0, message: "", email: "" }), 800);
@@ -514,15 +513,15 @@ function AccountsPageContent() {
       if ((data.errors ?? []).length > 0) {
         const firstError = data.errors?.[0]?.error;
         toast.error(
-          `${data.refreshed} làm mới thành công, không thành công ${(data.errors ?? []).length} ${firstError? `, lỗi đầu tiên: ${firstError}` : ""}`,
+          `${data.refreshed} refreshed successfully, failed ${(data.errors ?? []).length} ${firstError? `, first error: ${firstError}` : ""}`,
         );
       } else {
-        toast.success(`Đã làm mới thành công tài khoản ${data.refreshed} ${relogined > 0? `，Đã kích hoạt ${relogined} Đăng nhập lại bằng tài khoản` : ""}`);
+        toast.success(`Successfully refreshed ${data.refreshed} accounts${relogined > 0 ? `, triggered re-login for ${relogined} accounts` : ""}`);
       }
     } catch (error) {
       setProgress({ visible: false, current: 0, total: 0, message: "", email: "" });
       setRefreshSummary(null);
-      const message = error instanceof Error ? error.message : "Không thể làm mới tài khoản";
+      const message = error instanceof Error ? error.message : "Failed to refresh accounts";
       toast.error(message);
     } finally {
       setIsRefreshing(false);
@@ -554,45 +553,45 @@ function AccountsPageContent() {
     });
   };
 
-  const handleReLogin = async (accessTokens: string[]) => {
-    if (accessTokens.length === 0) {
-      toast.error("Vui lòng chọn tài khoản bạn muốn khôi phục trước");
+  const handleReLogin = async (accesstokenss: string[]) => {
+    if (accesstokenss.length === 0) {
+      toast.error("Please select the accounts you want to recover first");
       return;
     }
 
-    // Chỉ xử lý các tài khoản bất thường，Lọc các tài khoản không bất thường
-    const abnormalTokens = accessTokens.filter((token) => {
+    // Only process abnormal accounts, filter out non-abnormal ones
+    const abnormaltokenss = accesstokenss.filter((token) => {
       const account = accounts.find((a) => a.access_token === token);
-      return account?.status === "bất thường";
+      return account?.status === "Abnormal";
     });
 
-    if (abnormalTokens.length === 0) {
-      toast.error("Không có tài khoản bất thường nào trong số các tài khoản đã chọn.");
+    if (abnormaltokenss.length === 0) {
+      toast.error("No abnormal accounts among the selected ones.");
       return;
     }
 
-    if (abnormalTokens.length < accessTokens.length) {
-      toast.info(`Đã lọc ${accessTokens.length - abnormalTokens.length} tài khoản không bất thường`);
+    if (abnormaltokenss.length < accesstokenss.length) {
+      toast.info(`Filtered out ${accesstokenss.length - abnormaltokenss.length} non-abnormal accounts`);
     }
 
     setIsRelogining(true);
 
-    // Tính toán cơ sở của các tài khoản không được chọn（Liên kết thẻ thống kê）
-    const selectedTokenSet = new Set(abnormalTokens);
-    const baseAccountsList = accounts.filter((a) => !selectedTokenSet.has(a.access_token));
-    const baseActive = baseAccountsList.filter((a) => a.status === "bình thường").length;
-    const baseLimited = baseAccountsList.filter((a) => a.status === "Giới hạn hiện tại").length;
-    const baseAbnormal = baseAccountsList.filter((a) => a.status === "bất thường").length;
-    const baseDisabled = baseAccountsList.filter((a) => a.status === "Vô hiệu hóa").length;
+    // Compute base for unselected accounts (stats card link)
+    const selectedtokensSet = new Set(abnormaltokenss);
+    const baseAccountsList = accounts.filter((a) => !selectedtokensSet.has(a.access_token));
+    const baseActive = baseAccountsList.filter((a) => a.status === "Normal").length;
+    const baseLimited = baseAccountsList.filter((a) => a.status === "Rate limited").length;
+    const baseAbnormal = baseAccountsList.filter((a) => a.status === "Abnormal").length;
+    const baseDisabled = baseAccountsList.filter((a) => a.status === "Disabled").length;
 
-    // Hiển thị thanh tiến trình（tiến bộ thực sự）
-    const total = abnormalTokens.length;
-    setProgress({ visible: true, current: 0, total, message: "Đang cố gắng khôi phục tài khoản bất thường...", email: "" });
+    // Show progress bar (actual progress)
+    const total = abnormaltokenss.length;
+    setProgress({ visible: true, current: 0, total, message: "Attempting to recover abnormal accounts...", email: "" });
 
     try {
-      const { progress_id } = await reLoginAccounts(abnormalTokens);
+      const { progress_id } = await reLoginAccounts(abnormaltokenss);
 
-      // Tiến trình thăm dò ý kiến ​​đến khi hoàn thành
+      // Poll progress until complete
       await new Promise<void>((resolve, reject) => {
         const pollTimer = setInterval(async () => {
           try {
@@ -603,37 +602,37 @@ function AccountsPageContent() {
                 reject(new Error(p.error));
                 return;
               }
-              setProgress((prev) => ({ ...prev, current: prev.total, message: "Quá trình khôi phục hoàn tất" }));
+              setProgress((prev) => ({ ...prev, current: prev.total, message: "Recovery complete" }));
               setRefreshSummary(null);
               resolve();
             } else {
-              // Cập nhật tiến độ theo thời gian thực
+              // Update progress in real time
               const results = p.results ?? [];
-              // Tìm kết quả mới nhất có lỗi
+              // Find latest result with error
               const lastErrorResult = [...results].reverse().find((r) => r.error);
               const emailHint = lastErrorResult
-                ? `thất bại: ${lastErrorResult.token} ${lastErrorResult.error ?? ""}`
-                : `Đã xử lý ${p.processed}/${p.total}`;
+                ? `failed: ${lastErrorResult.token} ${lastErrorResult.error ?? ""}`
+                : `Processed ${p.processed}/${p.total}`;
               setProgress((prev) => ({
                 ...prev,
                 current: p.processed,
                 email: emailHint,
-                message: "Đang cố gắng khôi phục tài khoản bất thường...",
+                message: "Attempting to recover abnormal accounts...",
               }));
 
-              // Cập nhật thẻ thống kê theo thời gian thực：Hồng y + Kết quả khôi phục được xử lý
+              // Update stats in real time: base + processed recovery results
               let runningActive = baseActive;
               let runningAbnormal = baseAbnormal;
               let runningDisabled = baseDisabled;
               for (const r of results) {
-                if (r.status === "sự thành công") {
+                if (r.status === "success") {
                   runningActive += 1;
                   runningAbnormal -= 1;
-                } else if (r.status === "Vô hiệu hóa") {
+                } else if (r.status === "Disabled") {
                   runningDisabled += 1;
                   runningAbnormal -= 1;
                 }
-                // "bất thường"hoặc"bỏ qua"：Giữ trạng thái ngoại lệ không thay đổi
+                // "Abnormal" or "skip": keep exceptional status unchanged
               }
               setRefreshSummary({
                 total: accounts.length,
@@ -651,28 +650,28 @@ function AccountsPageContent() {
         }, 300);
       });
 
-      // Đợi chuỗi nền hoàn tất，Sau đó lấy dữ liệu mới nhất
+      // Wait for background thread to complete, then fetch latest data
       await new Promise<void>((resolve) => setTimeout(resolve, 500));
       try {
         const freshData = await fetchAccounts();
         setAccounts(freshData.items);
         setSelectedIds((prev) => prev.filter((id) => freshData.items.some((item) => item.access_token === id)));
-      } catch { /* Âm thầm thất bại */ }
+      } catch { /* Fail silently */ }
 
       setProgress({
         visible: true,
         current: total,
         total,
-        message: "Quá trình khôi phục đã hoàn tất",
+        message: "Recovery process completed",
         email: "",
       });
       setTimeout(() => setProgress({ visible: false, current: 0, total: 0, message: "", email: "" }), 800);
 
-      toast.success(`Quá trình khôi phục đã hoàn tất`);
+      toast.success(`Recovery process completed`);
     } catch (error) {
       setProgress({ visible: false, current: 0, total: 0, message: "", email: "" });
       setRefreshSummary(null);
-      const message = error instanceof Error ? error.message : "Đăng nhập lại không thành công";
+      const message = error instanceof Error ? error.message : "Re-login failed";
       toast.error(message);
     } finally {
       setIsRelogining(false);
@@ -688,17 +687,17 @@ function AccountsPageContent() {
   const handleTestAccountProxy = async () => {
     const candidate = editProxy.trim();
     if (!candidate) {
-      toast.error("Vui lòng điền địa chỉ proxy trước");
+      toast.error("Please enter the proxy address first");
       return;
     }
     setIsTestingProxy(true);
     try {
       const data = await testProxy(candidate);
       data.result.ok
-        ? toast.success(`Có sẵn proxy (${data.result.latency_ms} ms, HTTP ${data.result.status})`)
-        : toast.error(`proxy không có sẵn：${data.result.error ?? "lỗi không xác định"}`);
+        ? toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`)
+        : toast.error(`Proxy unavailable: ${data.result.error ?? "unknown error"}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Proxy thử nghiệm không thành công");
+      toast.error(error instanceof Error ? error.message : "Proxy test failed");
     } finally {
       setIsTestingProxy(false);
     }
@@ -718,9 +717,9 @@ function AccountsPageContent() {
       setAccounts(data.items);
       setSelectedIds((prev) => prev.filter((id) => data.items.some((item) => item.access_token === id)));
       setEditingAccount(null);
-      toast.success("Thông tin tài khoản đã được cập nhật");
+      toast.success("Account info updated");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không cập nhật được tài khoản";
+      const message = error instanceof Error ? error.message : "Failed to update account";
       toast.error(message);
     } finally {
       setIsUpdating(false);
@@ -742,7 +741,7 @@ function AccountsPageContent() {
           <div className="text-xs font-semibold tracking-[0.18em] text-stone-500 uppercase">
             Account Pool
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Quản lý nhóm số</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Account Pool</h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -753,7 +752,7 @@ function AccountsPageContent() {
             disabled={isLoading || isRefreshing || isDeleting}
           >
             <RefreshCw className={cn("size-4", isLoading ? "animate-spin" : "")} />
-            Làm mới
+            Refresh
           </Button>
           <Button
             variant="outline"
@@ -762,7 +761,7 @@ function AccountsPageContent() {
             disabled={isLoading || isRefreshing || isDeleting || accounts.length === 0}
           >
             <RefreshCw className={cn("size-4", isRefreshing ? "animate-spin" : "")} />
-            Làm mới tất cả thông tin tài khoản và hạn ngạch chỉ bằng một cú nhấp chuột
+            Refresh all account info and quota with one click
           </Button>
           <AccountImportDialog
             disabled={isLoading || isRefreshing || isDeleting}
@@ -775,16 +774,16 @@ function AccountsPageContent() {
           <Button
             variant="outline"
             className="h-10 rounded-xl border-stone-200 bg-white/80 px-4 text-stone-700 hover:bg-white"
-            onClick={() => downloadTokens(accounts)}
+            onClick={() => downloadtokenss(accounts)}
             disabled={accounts.length === 0}
           >
             <Download className="size-4" />
-            Xuất tất cả Token
+            Export all tokens
           </Button>
         </div>
       </section>
 
-      {/* thanh tiến trình */}
+      {/* progress bar */}
       {progress.visible && (
         <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white/90 shadow-sm">
           <div className="px-4 py-3">
@@ -810,14 +809,14 @@ function AccountsPageContent() {
       <Dialog open={Boolean(editingAccount)} onOpenChange={(open) => (!open ? setEditingAccount(null) : null)}>
         <DialogContent showCloseButton={false} className="rounded-2xl p-6">
           <DialogHeader className="gap-2">
-            <DialogTitle>Chỉnh sửa tài khoản</DialogTitle>
+            <DialogTitle>Edit account</DialogTitle>
             <DialogDescription className="text-sm leading-6">
-              Sửa đổi thủ công trạng thái tài khoản và proxy chuyên dụng。
+              Manually modify account status and dedicated proxy.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Trạng thái</label>
+              <label className="text-sm font-medium text-stone-700">Status</label>
               <Select value={editStatus} onValueChange={(value) => setEditStatus(value as AccountStatus)}>
                 <SelectTrigger className="h-11 rounded-xl border-stone-200 bg-white">
                   <SelectValue />
@@ -834,12 +833,12 @@ function AccountsPageContent() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">proxy tài khoản</label>
+              <label className="text-sm font-medium text-stone-700">proxy accounts</label>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
                   value={editProxy}
                   onChange={(event) => setEditProxy(event.target.value)}
-                  placeholder="Để trống để sử dụng proxy toàn cầu, ví dụ http://127.0.0.1:7890"
+                  placeholder="Leave blank to use global proxy, example: http://127.0.0.1:7890"
                   className="h-11 rounded-xl border-stone-200 bg-white"
                 />
                 <Button
@@ -849,7 +848,7 @@ function AccountsPageContent() {
                   disabled={isTestingProxy}
                 >
                   {isTestingProxy ? <LoaderCircle className="size-4 animate-spin" /> : <Link2 className="size-4" />}
-                  kiểm tra
+                  Test
                 </Button>
               </div>
             </div>
@@ -861,7 +860,7 @@ function AccountsPageContent() {
               onClick={() => setEditingAccount(null)}
               disabled={isUpdating}
             >
-              Hủy bỏ
+              Cancel
             </Button>
             <Button
               className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800"
@@ -869,7 +868,7 @@ function AccountsPageContent() {
               disabled={isUpdating}
             >
               {isUpdating ? <LoaderCircle className="size-4 animate-spin" /> : null}
-              Lưu thay đổi
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -900,7 +899,7 @@ function AccountsPageContent() {
         <Card className="rounded-2xl border-white/80 bg-white/90 shadow-sm">
           <CardContent className="p-4">
             <div className="mb-3 text-sm font-medium text-stone-700">
-              Các mô hình có sẵn của hệ thống
+              Available System Models
               <span className="ml-1 text-stone-400">({availableModels.length})</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -912,9 +911,9 @@ function AccountsPageContent() {
                     className="inline-flex cursor-pointer items-center rounded-full border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
                     onClick={() => {
                       void navigator.clipboard.writeText(model.id);
-                      toast.success("Đã sao chép tên mẫu");
+                      toast.success("Model name copied");
                     }}
-                    title={`Nhấp để sao chép ${model.id}`}
+                    title={`Click to copy ${model.id}`}
                   >
                     <img
                       src="/openai.svg"
@@ -926,9 +925,9 @@ function AccountsPageContent() {
                   </button>
                 ))
               ) : isLoadingModels ? (
-                <span className="text-sm text-stone-400">Đang tải danh sách mô hình...</span>
+                <span className="text-sm text-stone-400">Loading model list...</span>
               ) : (
-                <span className="text-sm text-stone-400">Hiện tại chưa có mẫu nào</span>
+                <span className="text-sm text-stone-400">No models currently available</span>
               )}
             </div>
           </CardContent>
@@ -938,7 +937,7 @@ function AccountsPageContent() {
       <section className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold tracking-tight">Danh sách tài khoản</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Account List</h2>
             <Badge variant="secondary" className="rounded-lg bg-stone-200 px-2 py-0.5 text-stone-700">
               {filteredAccounts.length}
             </Badge>
@@ -953,7 +952,7 @@ function AccountsPageContent() {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Tìm kiếm hộp thư"
+                placeholder="Search email"
                 className="h-10 rounded-xl border-stone-200 bg-white/85 pl-10"
               />
             </div>
@@ -1003,8 +1002,8 @@ function AccountsPageContent() {
                 <LoaderCircle className="size-5 animate-spin" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-stone-700">Đang tải tài khoản</p>
-                <p className="text-sm text-stone-500">Đồng bộ hóa danh sách tài khoản và trạng thái từ chương trình phụ trợ.</p>
+                <p className="text-sm font-medium text-stone-700">Loading accounts</p>
+                <p className="text-sm text-stone-500">Synchronizing account list and status from the backend.</p>
               </div>
             </CardContent>
           </Card>
@@ -1022,43 +1021,43 @@ function AccountsPageContent() {
                 <Button
                   variant="ghost"
                   className="h-8 rounded-lg px-3 text-stone-500 hover:bg-stone-100"
-                  onClick={() => void handleRefreshAccounts(selectedTokens)}
-                  disabled={selectedTokens.length === 0 || isRefreshing}
+                  onClick={() => void handleRefreshAccounts(selectedtokenss)}
+                  disabled={selectedtokenss.length === 0 || isRefreshing}
                 >
                   {isRefreshing ? <LoaderCircle className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-                  Làm mới thông tin tài khoản và hạn ngạch đã chọn
+                  Refresh selected account info and quota
                 </Button>
                 <Button
                   variant="ghost"
                   className="h-8 rounded-lg px-3 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
-                  onClick={() => void handleReLogin(selectedTokens)}
-                  disabled={selectedTokens.length === 0 || isRelogining}
-                  title="Thử đăng nhập mật khẩu để khôi phục tài khoản"
+                  onClick={() => void handleReLogin(selectedtokenss)}
+                  disabled={selectedtokenss.length === 0 || isRelogining}
+                  title="Attempt password login to recover accounts"
                 >
                   {isRelogining ? <LoaderCircle className="size-4 animate-spin" /> : <LogIn className="size-4" />}
-                  Cố gắng khôi phục tài khoản bất thường
+                  Attempt to recover Abnormal accounts
                 </Button>
                 <Button
                   variant="ghost"
                   className="h-8 rounded-lg px-3 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
-                  onClick={() => void handleDeleteTokens(abnormalTokens)}
-                  disabled={abnormalTokens.length === 0 || isDeleting}
+                  onClick={() => void handleDeletetokenss(abnormaltokenss)}
+                  disabled={abnormaltokenss.length === 0 || isDeleting}
                 >
                   {isDeleting ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                  Xóa tài khoản bất thường
+                  Delete Abnormal accounts
                 </Button>
                 <Button
                   variant="ghost"
                   className="h-8 rounded-lg px-3 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
-                  onClick={() => void handleDeleteTokens(selectedTokens)}
-                  disabled={selectedTokens.length === 0 || isDeleting}
+                  onClick={() => void handleDeletetokenss(selectedtokenss)}
+                  disabled={selectedtokenss.length === 0 || isDeleting}
                 >
                   {isDeleting ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                  Xóa đã chọn
+                  Delete selected
                 </Button>
                 {selectedIds.length > 0 ? (
                   <span className="rounded-lg bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">
-                    Đã chọn {selectedIds.length} mục
+                    Selected {selectedIds.length} items
                   </span>
                 ) : null}
               </div>
@@ -1075,17 +1074,17 @@ function AccountsPageContent() {
                       />
                     </th>
                     <th className="w-56 px-4 py-3">token</th>
-                    <th className="w-28 px-4 py-3">loại</th>
-                    <th className="w-24 px-4 py-3">Nguồn</th>
-                    <th className="w-24 px-4 py-3">Trạng thái</th>
-                    <th className="w-56 px-4 py-3">Thông tin tài khoản</th>
-                    <th className="w-32 px-4 py-3">thời gian sáng tạo</th>
-                    <th className="w-24 px-4 py-3">hạn ngạch</th>
-                    <th className="w-40 px-4 py-3">thời gian phục hồi</th>
-                    <th className="w-18 px-4 py-3">Trên đường đi</th>
-                    <th className="w-18 px-4 py-3">sự thành công</th>
-                    <th className="w-18 px-4 py-3">thất bại</th>
-                    <th className="w-24 px-4 py-3">hoạt động</th>
+                    <th className="w-28 px-4 py-3">Type</th>
+                    <th className="w-24 px-4 py-3">Source</th>
+                    <th className="w-24 px-4 py-3">Status</th>
+                    <th className="w-56 px-4 py-3">Account Info</th>
+                    <th className="w-32 px-4 py-3">Creation Time</th>
+                    <th className="w-24 px-4 py-3">Quota</th>
+                    <th className="w-40 px-4 py-3">Recovery Time</th>
+                    <th className="w-18 px-4 py-3">In Progress</th>
+                    <th className="w-18 px-4 py-3">Success</th>
+                    <th className="w-18 px-4 py-3">Failed</th>
+                    <th className="w-24 px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1113,14 +1112,14 @@ function AccountsPageContent() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <span className="font-medium tracking-tight text-stone-700">
-                              {maskToken(account.access_token)}
+                              {masktokens(account.access_token)}
                             </span>
                             <button
                               type="button"
                               className="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
                               onClick={() => {
                                 void navigator.clipboard.writeText(account.access_token);
-                                toast.success("đã sao chép token");
+                                toast.success("token copied");
                               }}
                             >
                               <Copy className="size-4" />
@@ -1188,8 +1187,8 @@ function AccountsPageContent() {
                                 }
                                 title={
                                   inflight > 0
-                                    ? "Số lượng hình ảnh hiện đang được tạo ra. Giá trị này tiếp tục > 0 khi pool tài khoản không hoạt động, cho biết vị trí đồng thời bị rò rỉ và tài khoản đã bị loại trừ khỏi lịch trình một cách âm thầm."
-                                    : "Hiện tại không có nhiệm vụ Tushengtu nào đang diễn ra"
+                                    ? "Number of images currently being generated. If this value stays > 0 when the account pool is idle, it indicates a leaked concurrent slot and the account has been silently excluded from scheduling."
+                                    : "No image generation tasks currently active"
                                 }
                               >
                                 {inflight}
@@ -1213,14 +1212,14 @@ function AccountsPageContent() {
                               type="button"
                               className="rounded-lg p-2 transition hover:bg-stone-100 hover:text-stone-700"
                               onClick={() => void handleRefreshAccounts([account.access_token])}
-                              disabled={isRefreshing || refreshingTokens.has(account.access_token)}
+                              disabled={isRefreshing || refreshingtokenss.has(account.access_token)}
                             >
-                              <RefreshCw className={cn("size-4", (isRefreshing || refreshingTokens.has(account.access_token)) ? "animate-spin" : "")} />
+                              <RefreshCw className={cn("size-4", (isRefreshing || refreshingtokenss.has(account.access_token)) ? "animate-spin" : "")} />
                             </button>
                             <button
                               type="button"
                               className="rounded-lg p-2 transition hover:bg-rose-50 hover:text-rose-500"
-                              onClick={() => void handleDeleteTokens([account.access_token])}
+                              onClick={() => void handleDeletetokenss([account.access_token])}
                               disabled={isDeleting}
                             >
                               <Trash2 className="size-4" />
@@ -1239,8 +1238,8 @@ function AccountsPageContent() {
                     <Search className="size-5" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-stone-700">Không có tài khoản phù hợp</p>
-                    <p className="text-sm text-stone-500">Điều chỉnh các điều kiện lọc hoặc tìm kiếm từ khóa và thử lại.</p>
+                    <p className="text-sm font-medium text-stone-700">No matching accounts</p>
+                    <p className="text-sm text-stone-500">Adjust filter conditions or search keywords and try again.</p>
                   </div>
                 </div>
               ) : null}
@@ -1249,13 +1248,13 @@ function AccountsPageContent() {
             <div className="border-t border-stone-100 px-4 py-4">
               <div className="flex items-center justify-center gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="shrink-0 text-sm text-stone-500">
-                Hiển thị {filteredAccounts.length === 0 ? 0 : startIndex + 1} -{" "}
-                {Math.min(startIndex + Number(pageSize), filteredAccounts.length)} tài khoản, tổng cộng{" "}
-                {filteredAccounts.length} tài khoản
+                Showing {filteredAccounts.length === 0 ? 0 : startIndex + 1} -{" "}
+                {Math.min(startIndex + Number(pageSize), filteredAccounts.length)} accounts, total{" "}
+                {filteredAccounts.length} accounts
                 </div>
 
                 <span className="shrink-0 text-sm leading-none text-stone-500">
-                  {safePage} / {pageCount} trang
+                  {safePage} / {pageCount} pages
                 </span>
                 <Select
                   value={pageSize}
@@ -1268,10 +1267,10 @@ function AccountsPageContent() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="10">10/trang</SelectItem>
-                    <SelectItem value="20">20/trang</SelectItem>
-                    <SelectItem value="50">50/trang</SelectItem>
-                    <SelectItem value="100">100/trang</SelectItem>
+                    <SelectItem value="10">10/page</SelectItem>
+                    <SelectItem value="20">20/page</SelectItem>
+                    <SelectItem value="50">50/page</SelectItem>
+                    <SelectItem value="100">100/page</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button

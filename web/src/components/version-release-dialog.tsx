@@ -43,7 +43,7 @@ export function VersionReleaseDialog({ className }: { className?: string }) {
           className,
         )}
         onClick={openReleaseModal}
-        title="Xem cập nhật phiên bản"
+        title="View cập nhật phiên bản"
       >
         v{webConfig.appVersion}
         {hasNewVersion ? (

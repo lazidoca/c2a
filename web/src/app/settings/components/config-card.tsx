@@ -49,7 +49,7 @@ export function ConfigCard() {
   const handleTestProxy = async () => {
     const candidate = String(config?.proxy || "").trim();
     if (!candidate) {
-      toast.error("Vui lòng điền địa chỉ proxy trước");
+      toast.error("Please enter the proxy address first");
       return;
     }
     setIsTestingProxy(true);
@@ -58,12 +58,12 @@ export function ConfigCard() {
       const data = await testProxy(candidate);
       setProxyTestResult(data.result);
       if (data.result.ok) {
-        toast.success(`Có sẵn proxy (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
+        toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`proxy không có sẵn：${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Proxy thử nghiệm không thành công");
+      toast.error(error instanceof Error ? error.message : "Proxy test failed");
     } finally {
       setIsTestingProxy(false);
     }
@@ -83,18 +83,18 @@ export function ConfigCard() {
     <Card className="rounded-2xl border-white/80 bg-white/90 shadow-sm">
       <CardContent className="space-y-4 p-6">
         <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-600">
-          Khóa đăng nhập quản trị viên tiếp tục được đọc từ cấu hình triển khai，Không hiển thị trên trang này nữa；Để phân phát cho người khác，Vui lòng tạo khóa người dùng bình thường bên dưới。
+          Khóa đăng nhập quản trị viên tiếp tục được đọc từ cấu hình triển khai，Không hiển thị trên trang này nữa；Để phân phát cho người khác，Vui lòng tạo User Keys Normal bên dưới。
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Khoảng thời gian làm mới tài khoản</label>
+            <label className="text-sm text-stone-700">Khoảng thời gian làm mới accounts</label>
             <Input
               value={String(config?.refresh_account_interval_minute || "")}
               onChange={(event) => setRefreshAccountIntervalMinute(event.target.value)}
               placeholder="phút"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Trong vài phút, kiểm soát tần suất làm mới tự động của tài khoản.</p>
+            <p className="text-xs text-stone-500">Trong vài phút, kiểm soát tần suất làm mới tự động của accounts.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm text-stone-700">proxy toàn cầu</label>
@@ -108,7 +108,7 @@ export function ConfigCard() {
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
             <p className="text-xs leading-5 text-stone-500">
-              Để trống để không sử dụng proxy。Thỏa thuận hỗ trợ://tài khoản:Mật khẩu@Máy chủ:hải cảng，Bạn cũng có thể dán trực tiếp proxy Máy chủ:hải cảng:tài khoản:Mật khẩu；Ví dụ http://user:pass@127.0.0.1:7890、127.0.0.1:7890:user:pass。Mật khẩu tài khoản bao gồm @/: Bắt buộc khi chờ ký tự đặc biệt URL mã hóa。
+              Để trống để không sử dụng proxy。Thỏa thuận hỗ trợ://accounts:Mật khẩu@Máy chủ:hải cảng，Bạn cũng có thể dán trực tiếp proxy Máy chủ:hải cảng:accounts:Mật khẩu；Ví dụ http://user:pass@127.0.0.1:7890、127.0.0.1:7890:user:pass。Mật khẩu accounts bao gồm @/: Bắt buộc khi chờ ký tự đặc biệt URL mã hóa。
             </p>
             {proxyTestResult ? (
               <div
@@ -120,7 +120,7 @@ export function ConfigCard() {
               >
                 {proxyTestResult.ok
                   ? `Proxy khả dụng: HTTP ${proxyTestResult.status}, thời gian ${proxyTestResult.latency_ms} ms`
-                  : `proxy không có sẵn：${proxyTestResult.error ?? "lỗi không xác định"}（thời gian ${proxyTestResult.latency_ms} ms）`}
+                  : `Proxy unavailable: ${proxyTestResult.error ?? "lỗi không xác định"}（thời gian ${proxyTestResult.latency_ms} ms）`}
               </div>
             ) : null}
             <div className="flex justify-end">
@@ -167,14 +167,14 @@ export function ConfigCard() {
             <p className="text-xs text-stone-500">Tính bằng giây, thời gian tối đa để chờ kết quả hình ảnh upstream.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Đồng thời hình ảnh một tài khoản</label>
+            <label className="text-sm text-stone-700">Đồng thời hình ảnh một accounts</label>
             <Input
               value={String(config?.image_account_concurrency || "")}
               onChange={(event) => setImageAccountConcurrency(event.target.value)}
               placeholder="1"
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
-            <p className="text-xs text-stone-500">Giới hạn số lượng yêu cầu hình ảnh được mỗi tài khoản xử lý cùng lúc, mặc định là 3.</p>
+            <p className="text-xs text-stone-500">Giới hạn số lượng yêu cầu hình ảnh được mỗi accounts xử lý cùng lúc, mặc định là 3.</p>
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
@@ -182,7 +182,7 @@ export function ConfigCard() {
                 checked={Boolean(config?.auto_remove_invalid_accounts)}
                 onCheckedChange={(checked) => setAutoRemoveInvalidAccounts(Boolean(checked))}
               />
-              Tự động loại bỏ các tài khoản bất thường
+              Tự động loại bỏ các accounts Abnormal
             </label>
             <p className="text-xs text-stone-500">Phát hiện và loại bỏ khi làm mới</p>
           </div>
@@ -207,7 +207,7 @@ export function ConfigCard() {
             <p className="text-xs text-stone-500">Sau khi lấy được hình ảnh thành công, tự động ẩn cuộc hội thoại tương ứng trên ChatGPT ở chế độ bất đồng bộ.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-stone-700">Thời gian chờ hình ảnh tiếp tục thời gian chờ đợi</label>
+            <label className="text-sm text-stone-700">Time chờ hình ảnh tiếp tục thời gian chờ đợi</label>
             <Input
               value={String(config?.image_timeout_retry_secs || "30")}
               onChange={(event) => setImageTimeoutRetrySecs(event.target.value)}
@@ -234,9 +234,9 @@ export function ConfigCard() {
                   checked={Boolean(config?.auto_relogin_after_refresh)}
                   onCheckedChange={(checked) => setAutoReloginAfterRefresh(Boolean(checked))}
                 />
-                Tự động cố gắng loại bỏ trạng thái bất thường sau khi làm mới
+                Tự động cố gắng loại bỏ trạng thái Abnormal sau khi làm mới
               </label>
-              <p className="text-xs text-stone-500">Tự động thử mật khẩu để đăng nhập và khôi phục tài khoản khi làm mới sau khi bật.</p>
+              <p className="text-xs text-stone-500">Tự động thử mật khẩu để đăng nhập và khôi phục accounts khi làm mới sau khi bật.</p>
             </div>
             <div className="flex-1" aria-hidden="true" />
           </div>
@@ -245,7 +245,7 @@ export function ConfigCard() {
               checked={Boolean(config?.auto_remove_rate_limited_accounts)}
               onCheckedChange={(checked) => setAutoRemoveRateLimitedAccounts(Boolean(checked))}
             />
-            Tự động xóa tài khoản bị giới hạn hiện tại
+            Tự động xóa accounts bị giới hạn hiện tại
           </label>
           <div className="space-y-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
             <div>
@@ -291,7 +291,7 @@ export function ConfigCard() {
                   checked={Boolean(config?.image_storage?.enabled)}
                   onCheckedChange={(checked) => setImageStorageField("enabled", Boolean(checked))}
                 />
-                kích hoạt WebDAV Lưu trữ hình ảnh
+                kích hoạt WebDAV Save trữ hình ảnh
               </label>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -330,7 +330,7 @@ export function ConfigCard() {
                       : "Máy này chỉ"
                   : "Máy này chỉ"}
               </span>
-              <span className="ml-2 text-stone-400">Sau khi sửa đổi, bạn cần nhấp vào Lưu hoặc lưu tự động thông qua nút Kiểm tra/Đồng bộ hóa.</span>
+              <span className="ml-2 text-stone-400">Sau khi sửa đổi, bạn cần nhấp vào Save hoặc lưu tự động thông qua nút Kiểm tra/Đồng bộ hóa.</span>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
@@ -411,7 +411,7 @@ export function ConfigCard() {
               kích hoạt AI đánh giá
             </label>
             <p className="text-xs leading-6 text-stone-500">
-              Khi được bật, mô hình kiểm tra sẽ được gọi trước khi yêu cầu nhập tài khoản Shengtu.，Việc không vượt qua được đánh giá sẽ dẫn đến việc bị từ chối trực tiếp.，Giảm nguy cơ lời nhắc bất hợp pháp đến tài khoản, gây ra rủi ro kiểm soát hoặc đình chỉ tài khoản。
+              Khi được bật, mô hình kiểm tra sẽ được gọi trước khi yêu cầu nhập accounts Shengtu.，Việc không vượt qua được đánh giá sẽ dẫn đến việc bị từ chối trực tiếp.，Giảm nguy cơ lời nhắc bất hợp pháp đến accounts, gây ra rủi ro kiểm soát hoặc đình chỉ accounts。
             </p>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">

@@ -33,7 +33,7 @@ const MAX_HISTORY = 20;
 const DRAFT_ID = "__draft__";
 const taskIdOf = (task: EditableFileTask | null | undefined) => task?.taskId || task?.id || "";
 const isRunning = (task: EditableFileTask | null | undefined) => task?.status === "queued" || task?.status === "running";
-const statusText = (status: string) => ({ queued: "Xếp hàng", running: "Đang tạo", success: "Đã hoàn thành", error: "thất bại" }[status] || status);
+const statusText = (status: string) => ({ queued: "Queued", running: "Generating", success: "Completed", error: "Failed" }[status] || status);
 const statusClass = (status: string) => status === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-300" : status === "error" ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-300" : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300";
 const formatElapsed = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(seconds % 60).padStart(2, "0")}s`;
 const titleOfPrompt = (prompt: string, fallback: string) => prompt.trim().replace(/\s+/g, " ").slice(0, 24) || fallback;
@@ -84,7 +84,7 @@ function ResultFile({ href, icon, label }: { href?: string; icon: ReactNode; lab
         <div className="truncate text-xs text-stone-500 dark:text-stone-400">{fileNameOf(href)}</div>
       </div>
       <Button size="sm" asChild>
-        <a href={href} target="_blank" rel="noreferrer">Tải xuống</a>
+        <a href={href} target="_blank" rel="noreferrer">Download</a>
       </Button>
     </div>
   );
@@ -262,7 +262,7 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
   };
   const startRename = (id: string) => {
     setRenamingId(id);
-    setRenamingTitle(drafts[id]?.title || titleOfPrompt(drafts[id]?.prompt || "", `nhiệm vụ ${kind.toUpperCase()}`));
+    setRenamingTitle(drafts[id]?.title || titleOfPrompt(drafts[id]?.prompt || "", `${kind.toUpperCase()} Task`));
   };
   const commitRename = () => {
     renameTask(renamingId, renamingTitle);
@@ -277,7 +277,7 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
         <div className="flex h-14 items-center justify-between border-b border-stone-200 px-4 dark:border-white/10">
           <div className="flex items-center gap-2 text-sm font-semibold text-stone-950 dark:text-stone-50">
             <History className="size-4" />
-            Lịch sử
+            History
           </div>
           <div className="flex gap-1">
             <Button size="sm" variant="ghost" onClick={createDraft}>
@@ -337,7 +337,7 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
               </div>
             );
           }) : (
-            <div className="flex h-full items-center justify-center text-sm text-stone-400 dark:text-stone-500">Chưa có bản ghi nào</div>
+            <div className="flex h-full items-center justify-center text-sm text-stone-400 dark:text-stone-500">No records yet</div>
           )}
         </div>
       </aside>
@@ -347,22 +347,22 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
           <h2 className="text-sm font-semibold text-stone-950 dark:text-stone-50">{title}</h2>
           <Button size="sm" onClick={() => void submit()} disabled={submitting || running}>
             {submitting ? <LoaderCircle className="animate-spin" /> : <Play />}
-            tạo ra
+            Generate
           </Button>
         </div>
         <div className="min-h-0 flex-1 space-y-5 overflow-auto p-5">
           <div className="space-y-2">
-            <Label htmlFor={`${endpoint}-prompt`} className="text-xs font-semibold text-stone-700 dark:text-stone-300">nhu cầu</Label>
+            <Label htmlFor={`${endpoint}-prompt`} className="text-xs font-semibold text-stone-700 dark:text-stone-300">Prompt Requirements</Label>
             <Textarea id={`${endpoint}-prompt`} value={prompt} onChange={(event) => setPrompt(event.target.value)} className="min-h-56 rounded-md border-stone-200 bg-white text-sm leading-6 shadow-none dark:border-white/10 dark:bg-white/[0.03]" />
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-stone-700 dark:text-stone-300">Hình ảnh tham khảo</Label>
+              <Label className="text-xs font-semibold text-stone-700 dark:text-stone-300">Reference Images</Label>
               <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500 dark:bg-white/10 dark:text-stone-400">{images.length}</span>
             </div>
             <label className="group flex h-24 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-stone-300 bg-stone-50 text-sm font-medium text-stone-600 transition hover:border-stone-950 hover:bg-white dark:border-white/15 dark:bg-white/[0.03] dark:text-stone-300 dark:hover:border-white/50">
               <ImagePlus className="size-4 transition group-hover:scale-110" />
-              Tải ảnh lên
+              Upload Image
               <Input type="file" accept="image/*" multiple onChange={(event) => void appendFiles(event.target.files)} className="hidden" />
             </label>
             {images.length ? (
@@ -376,7 +376,7 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => setImages([])}>
               <Trash2 />
-              Xóa hình ảnh
+              Delete image
             </Button>
           </div>
           {error ? <div className="flex gap-2 rounded-md border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-300"><AlertCircle className="mt-0.5 size-4 shrink-0" />{error}</div> : null}
@@ -385,7 +385,7 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
 
       <section className="flex min-h-0 flex-col">
         <div className="flex h-14 items-center justify-between border-b border-stone-200 px-5 dark:border-white/10">
-          <h2 className="text-sm font-semibold text-stone-950 dark:text-stone-50">Trạng thái xây dựng</h2>
+          <h2 className="text-sm font-semibold text-stone-950 dark:text-stone-50">Build Status</h2>
           {selectedTask ? <span className={cn("rounded-full border px-2.5 py-1 text-xs", statusClass(selectedTask.status))}>{statusText(selectedTask.status)}</span> : null}
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-5">
@@ -393,14 +393,14 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
             <div className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-[150px_150px_minmax(0,1fr)]">
                 <div className="rounded-md border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Trạng thái</div>
+                  <div className="text-xs text-stone-500 dark:text-stone-400">Status</div>
                   <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-stone-950 dark:text-stone-50">
                     {selectedTask.status === "success" ? <CheckCircle2 className="size-4 text-emerald-500" /> : selectedTask.status === "error" ? <XCircle className="size-4 text-rose-500" /> : <LoaderCircle className="size-4 animate-spin text-amber-500" />}
                     {statusText(selectedTask.status)}
                   </div>
                 </div>
                 <div className="rounded-md border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Đã thực hiện</div>
+                  <div className="text-xs text-stone-500 dark:text-stone-400">Elapsed Time</div>
                   <div className="mt-2 text-2xl font-semibold tabular-nums text-stone-950 dark:text-stone-50">{formatElapsed(elapsedOf(selectedTask))}</div>
                 </div>
                 <div className="rounded-md border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/[0.03]">
@@ -411,16 +411,16 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
 
               {selectedTask.result ? (
                 <div className="space-y-3 rounded-md border border-stone-200 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
-                  <div className="text-sm font-semibold text-stone-950 dark:text-stone-50">Tạo kết quả</div>
-                  <ResultFile href={selectedTask.result.primary_url} icon={<FileText className="size-4" />} label={kind === "ppt" ? "tập tin PPT" : "tập tin PSD"} />
-                  <ResultFile href={selectedTask.result.zip_url} icon={<FileArchive className="size-4" />} label="Gói vật liệu" />
+                  <div className="text-sm font-semibold text-stone-950 dark:text-stone-50">Generated Results</div>
+                  <ResultFile href={selectedTask.result.primary_url} icon={<FileText className="size-4" />} label={kind === "ppt" ? "PPT File" : "PSD File"} />
+                  <ResultFile href={selectedTask.result.zip_url} icon={<FileArchive className="size-4" />} label="Material Pack ZIP" />
                 </div>
               ) : null}
 
               {selectedTask.error ? <div className="rounded-md border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-300">{selectedTask.error}</div> : null}
             </div>
           ) : (
-            <div className="flex h-full min-h-80 items-center justify-center text-sm text-stone-400 dark:text-stone-500">Chưa có nhiệm vụ nào</div>
+            <div className="flex h-full min-h-80 items-center justify-center text-sm text-stone-400 dark:text-stone-500">No tasks selected</div>
           )}
         </div>
       </section>
@@ -428,14 +428,14 @@ export function EditableFilePanel({ title, kind, endpoint, defaultPrompt, imageR
     <Dialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
       <DialogContent className="rounded-xl" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>{deleteConfirm?.type === "all" ? "Xóa lịch sử" : "Xóa lịch sử"}</DialogTitle>
+          <DialogTitle>{deleteConfirm?.type === "all" ? "Clear history" : "Clear history"}</DialogTitle>
           <DialogDescription>
-            {deleteConfirm?.type === "all" ? "Bạn có chắc chắn xóa lịch sử của loại hiện tại không?" : "Bạn có chắc chắn xóa bản ghi lịch sử này không?"}
+            {deleteConfirm?.type === "all" ? "Are you sure you want to clear the entire history of this type?" : "Are you sure you want to delete this task record?"}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Hủy bỏ</Button>
-          <Button variant="destructive" onClick={confirmDelete}>Xác nhận xóa</Button>
+          <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+          <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

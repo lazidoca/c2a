@@ -62,7 +62,7 @@ export function ProxyRuntimeCard() {
       const data = await testProxy();
       setProxyResult(data.result);
       if (data.result.ok) {
-        toast.success(`Có sẵn proxy FlareSolverr (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
+        toast.success(`Proxy available FlareSolverr (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
         toast.error(`proxy đống đổ nát không có sẵn：${data.result.error ?? "lỗi không xác định"}`);
       }
@@ -86,7 +86,7 @@ export function ProxyRuntimeCard() {
       if (data.result.ok) {
         toast.success(`Lấy Clearance thành công (${data.result.latency_ms} ms)`);
       } else {
-        toast.error(`Lấy Clearance thất bại: ${data.result.error ?? data.result.status}`);
+        toast.error(`Lấy Clearance failed: ${data.result.error ?? data.result.status}`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Kiểm tra Clearance thất bại");
@@ -114,7 +114,7 @@ export function ProxyRuntimeCard() {
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-600">
-          Ưu tiên proxy：proxy tài khoản &gt; FlareSolverr liên kết proxy &gt; proxy rõ ràng &gt; proxy toàn cầu。Cookie / cf_clearance Sẽ không được trả lại bằng văn bản rõ ràng trong phản hồi API。
+          Ưu tiên proxy：proxy accounts &gt; FlareSolverr liên kết proxy &gt; proxy rõ ràng &gt; proxy toàn cầu。Cookie / cf_clearance Sẽ không được trả lại bằng văn bản rõ ràng trong phản hồi API。
         </div>
 
         <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-6 text-amber-800">
@@ -159,7 +159,7 @@ export function ProxyRuntimeCard() {
               disabled={!runtimeEnabled || runtime.egress_mode !== "single_proxy"}
             />
             <p className="text-xs leading-5 text-stone-500">
-              hỗ trợ http/https/socks5/socks5h，socks5 sẽ được chuyển đổi thành socks5h。Với hình thức chứng nhận：thỏa thuận://tài khoản:Mật khẩu@Máy chủ:hải cảng，Bạn cũng có thể dán trực tiếp Máy chủ:hải cảng:tài khoản:Mật khẩu。
+              hỗ trợ http/https/socks5/socks5h，socks5 sẽ được chuyển đổi thành socks5h。Với hình thức chứng nhận：thỏa thuận://accounts:Mật khẩu@Máy chủ:hải cảng，Bạn cũng có thể dán trực tiếp Máy chủ:hải cảng:accounts:Mật khẩu。
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export function ProxyRuntimeCard() {
               onCheckedChange={(checked) => setProxyRuntimeField("skip_ssl_verify", Boolean(checked))}
               disabled={!runtimeEnabled}
             />
-            bỏ qua SSL Xác minh
+            skip SSL Xác minh
           </label>
 
           <div className="flex items-end justify-end">
@@ -212,7 +212,7 @@ export function ProxyRuntimeCard() {
             <div className={`rounded-xl border px-3 py-2 text-xs leading-6 md:col-span-2 ${proxyResult.ok ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"}`}>
               {proxyResult.ok
                 ? `proxy có sẵn：HTTP ${proxyResult.status}，thời gian ${proxyResult.latency_ms} ms，Nguồn ${proxyResult.proxy_source ?? "unknown"}`
-                : `proxy không có sẵn：${proxyResult.error ?? "lỗi không xác định"}（thời gian ${proxyResult.latency_ms} ms）`}
+                : `Proxy unavailable: ${proxyResult.error ?? "lỗi không xác định"}（thời gian ${proxyResult.latency_ms} ms）`}
             </div>
           ) : null}
         </div>
@@ -284,7 +284,7 @@ export function ProxyRuntimeCard() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-stone-700">Làm mới khoảng thời gian giây</label>
+              <label className="text-sm text-stone-700">Refresh khoảng thời gian giây</label>
               <Input
                 value={String(clearance.refresh_interval)}
                 onChange={(event) => setProxyRuntimeClearanceField("refresh_interval", event.target.value)}
@@ -370,7 +370,7 @@ export function ProxyRuntimeCard() {
             disabled={isSavingConfig}
           >
             {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-            Lưu cấu hình
+            Save cấu hình
           </Button>
         </div>
       </CardContent>

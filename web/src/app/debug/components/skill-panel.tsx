@@ -23,14 +23,14 @@ export function SkillPanel() {
   const apiBaseUrl = configuredBaseUrl || webConfig.apiUrl.replace(/\/$/, "") || browserBaseUrl;
   const skillZh = useMemo(() => `---
 name: chatgpt2api-search
-description: Khi người dùng có nhu cầu tìm kiếm online、Kiểm tra thông tin mới nhất、Khi xác minh sự thật hoặc cần một liên kết đến một nguồn，gọi địa phương chatgpt2api Giao diện tìm kiếm。
+description: 当用户需要在线搜索、查询最新信息、验证事实或需要源链接时，调用本地 chatgpt2api 搜索接口。
 ---
 
-# ChatGPT2API Tìm kiếm
+# ChatGPT2API Search
 
-Khi người dùng yêu cầu tìm kiếm trên Internet、Kiểm tra thông tin mới nhất、Xác minh thông tin、kiểm tra tin tức、Kiểm tra giá、Khi kiểm tra cập nhật tài liệu hoặc khi bạn cần liên kết nguồn，sử dụng cái này skill。
+当用户要求在互联网上搜索、查询最新信息、验证信息、检查新闻、查询价格、检查文档更新或需要源链接时，使用此 skill。
 
-## giao diện
+## 接口
 
 POST ${apiBaseUrl}/v1/search
 
@@ -42,14 +42,14 @@ Content-Type: application/json
 Body:
 
 {
-  "prompt": "<Câu hỏi người dùng đang tìm kiếm>"
+  "prompt": "<用户要搜索的问题>"
 }
 
-## Quay lại xử lý
+## 后端处理
 
-- được trả về từ API \`answer\` như câu trả lời chính。
-- nếu có \`sources\`，Bao gồm một liên kết nguồn trong câu trả lời của bạn。
-- Nếu API báo lỗi，Mô tả ngắn gọn lỗi và hỏi xem bạn có muốn thử lại không。`, [apiBaseUrl, authKey]);
+- API 返回的 \`answer\` 将作为主要回答。
+- 如果有 \`sources\`，请在回答中包含源链接。
+- 如果 API 报错，简要描述错误并询问是否重试。\`, [apiBaseUrl, authKey]);
 
   const skillEn = useMemo(() => `---
 name: chatgpt2api-search
@@ -88,17 +88,17 @@ JSON body:
 - If the endpoint returns an error, summarize the error and ask the user whether to retry.
 - Keep the final answer concise unless the user asks for detail.`, [apiBaseUrl, authKey]);
 
-  const zhPrompt = useMemo(() => `Xin hãy giúp tôi cài đặt một cái để tìm kiếm trên Internet trên máy này skill。
+  const zhPrompt = useMemo(() => `请帮我在这台机器上安装一个用于在互联网上搜索的 skill。
 
-yêu cầu：
-1. Vui lòng nhấp vào môi trường hiện tại của bạn skill Thông số kỹ thuật cài đặt，cài đặt nó cục bộ skill。
-2. skill Tên là：chatgpt2api-search
-3. Tên tập tin là：SKILL.md
-4. Nếu bạn không thể xác định địa phương skills thư mục ở đâu，Đầu tiên hãy cho tôi biết tôi cần đặt nó vào thư mục nào，Đừng đoán đường đi。
-5. Chỉ tạo hoặc cập nhật cái này skill tập tin，Không sửa đổi các tập tin không liên quan khác。
-6. SKILL.md Hãy viết đầy đủ nội dung bên dưới。
+要求：
+1. 请根据你当前环境的 skill 安装规范，在本地安装它。
+2. skill 名称为：chatgpt2api-search
+3. 文件名为：SKILL.md
+4. 如果你无法确定本地 skills 目录在哪里，先告诉我需要放在哪个目录下，不要盲猜路径。
+5. 仅创建或更新此 skill 文件，不要修改其他无关文件。
+6. SKILL.md 请完整写入以下内容。
 
-SKILL.md nội dung：
+SKILL.md 内容：
 
 \`\`\`markdown
 ${skillZh}
@@ -122,7 +122,7 @@ ${skillEn}
 
   const copyText = async (text: string) => {
     await navigator.clipboard.writeText(text);
-    toast.success("Đã sao chép");
+    toast.success("Copied to clipboard");
   };
 
   const downloadSkill = (text: string) => {
@@ -135,8 +135,8 @@ ${skillEn}
   };
 
   const versions = [
-    { title: "Hướng dẫn cài đặt tiếng Trung", desc: "Sau khi sao chép, hãy gửi trực tiếp đến Codex hoặc Claude và để nó được cài đặt cục bộ.", prompt: zhPrompt, skill: skillZh },
-    { title: "English install prompt", desc: "Copy and send this to Codex or Claude to install locally.", prompt: enPrompt, skill: skillEn },
+    { title: "Chinese installation prompt", desc: "Copy and send directly to Codex or Claude to install locally.", prompt: zhPrompt, skill: skillZh },
+    { title: "English installation prompt", desc: "Copy and send this to Codex or Claude to install locally.", prompt: enPrompt, skill: skillEn },
   ];
 
   return (
@@ -151,11 +151,11 @@ ${skillEn}
             <div className="flex gap-2">
               <Button size="sm" variant="outline" className="cursor-pointer" onClick={() => downloadSkill(item.skill)}>
                 <Download />
-                Tải xuống
+                Download
               </Button>
               <Button size="sm" className="cursor-pointer" onClick={() => void copyText(item.prompt)}>
                 <Copy />
-                Sao chép
+                Copy
               </Button>
             </div>
           </div>

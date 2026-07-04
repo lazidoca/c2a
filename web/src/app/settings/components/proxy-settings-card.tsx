@@ -26,7 +26,7 @@ export function ProxySettingsCard() {
   const handleTest = async () => {
     const candidate = proxy.trim();
     if (!candidate) {
-      toast.error("Vui lòng điền địa chỉ proxy trước");
+      toast.error("Please enter the proxy address first");
       return;
     }
     setIsTesting(true);
@@ -35,12 +35,12 @@ export function ProxySettingsCard() {
       const data = await testProxy(candidate);
       setTestResult(data.result);
       if (data.result.ok) {
-        toast.success(`Có sẵn proxy (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
+        toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`proxy không có sẵn：${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Proxy thử nghiệm không thành công");
+      toast.error(error instanceof Error ? error.message : "Proxy test failed");
     } finally {
       setIsTesting(false);
     }
@@ -96,7 +96,7 @@ export function ProxySettingsCard() {
               >
                 {testResult.ok
                   ? `Proxy khả dụng: HTTP ${testResult.status}, thời gian ${testResult.latency_ms} ms`
-                  : `proxy không có sẵn：${testResult.error ?? "lỗi không xác định"}（thời gian ${testResult.latency_ms} ms）`}
+                  : `Proxy unavailable: ${testResult.error ?? "lỗi không xác định"}（thời gian ${testResult.latency_ms} ms）`}
               </div>
             ) : null}
 
@@ -116,7 +116,7 @@ export function ProxySettingsCard() {
                 disabled={isSavingConfig}
               >
                 {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Lưu cấu hình
+                Save cấu hình
               </Button>
             </div>
           </>

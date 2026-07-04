@@ -61,7 +61,7 @@ export function ThirdPartyAppsCard() {
               className="h-10 rounded-xl border-stone-200 bg-white"
             />
             <p className="text-xs leading-5 text-stone-500">
-              Nó sẽ được thêm vào khi lối vào trên cùng nhảy apiKey và baseUrl thông số；Điều hướng trên cùng không hiển thị canvas vô hạn sau khi đóng。
+              Nó sẽ được additional vào khi lối vào trên cùng nhảy apiKey và baseUrl thông số；Điều hướng trên cùng không hiển thị canvas vô hạn sau khi đóng。
             </p>
             <p className="text-xs leading-5 text-amber-700">
               Lối vào này chỉ dành cho thử nghiệm cá nhân；Để sử dụng lâu dài, bạn nên tự mình triển khai canvas không giới hạn tại địa phương.。

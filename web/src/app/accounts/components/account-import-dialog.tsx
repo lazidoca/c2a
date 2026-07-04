@@ -54,15 +54,15 @@ type PendingAccountJsonImport = {
 
 const sessionUrl = "https://chatgpt.com/api/auth/session";
 
-function splitTokens(value: string) {
+function splittokenss(value: string) {
   return value
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
-function getSessionAccessToken(value: unknown) {
-  const token = (value as { accessToken?: unknown })?.accessToken;
+function getSessionAccesstokens(value: unknown) {
+  const token = (value as { accesstokens?: unknown })?.accesstokens;
   return typeof token === "string" ? token.trim() : "";
 }
 
@@ -71,7 +71,7 @@ function getAccountJsonAccount(value: unknown): AccountImportPayload | null {
     return null;
   }
   const raw = value as Record<string, unknown>;
-  const tokenValue = raw.access_token ?? raw.accessToken;
+  const tokenValue = raw.access_token ?? raw.accesstokens;
   const token = typeof tokenValue === "string" ? tokenValue.trim() : "";
   if (!token) {
     return null;
@@ -82,7 +82,7 @@ function getAccountJsonAccount(value: unknown): AccountImportPayload | null {
     access_token: token,
     source_type: "codex",
   };
-  delete payload.accessToken;
+  delete payload.accesstokens;
   if (payload.type === "codex") {
     payload.export_type = "codex";
     delete payload.type;
@@ -120,7 +120,7 @@ function getCodexAuthAccount(value: unknown): AccountImportPayload | null {
     return null;
   }
   const raw = value as Record<string, unknown>;
-  const tokenValue = raw.access_token ?? raw.accessToken;
+  const tokenValue = raw.access_token ?? raw.accesstokens;
   const token = typeof tokenValue === "string" ? tokenValue.trim() : "";
   if (!token) {
     return null;
@@ -132,7 +132,7 @@ function getCodexAuthAccount(value: unknown): AccountImportPayload | null {
     export_type: "codex",
     source_type: "codex",
   };
-  delete payload.accessToken;
+  delete payload.accesstokens;
   if (payload.type === "codex") {
     delete payload.type;
   }
@@ -184,7 +184,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState<ImportMethod>("menu");
-  const [tokenInput, setTokenInput] = useState("");
+  const [tokenInput, settokensInput] = useState("");
   const [sessionInput, setSessionInput] = useState("");
   const [codexAuthInput, setCodexAuthInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -200,7 +200,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
 
   const resetState = () => {
     setMethod("menu");
-    setTokenInput("");
+    settokensInput("");
     setSessionInput("");
     setCodexAuthInput("");
     setPendingAccountJsonImport(null);
@@ -218,17 +218,17 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
     }
   };
 
-  const submitTokens = async (tokens: string[], successText?: string, accountPayloads: AccountImportPayload[] = []) => {
-    const normalizedTokens = tokens.map((item) => item.trim()).filter(Boolean);
+  const submittokenss = async (tokens: string[], successText?: string, accountPayloads: AccountImportPayload[] = []) => {
+    const normalizedtokenss = tokens.map((item) => item.trim()).filter(Boolean);
 
-    if (normalizedTokens.length === 0) {
-      toast.error("Trước tiên, vui lòng cung cấp ít nhất một Token có sẵn");
+    if (normalizedtokenss.length === 0) {
+      toast.error("Trước tiên, vui lòng cung cấp ít nhất một tokens có sẵn");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const data = await createAccounts(normalizedTokens, accountPayloads);
+      const data = await createAccounts(normalizedtokenss, accountPayloads);
       onImported(data.items);
       setOpen(false);
       resetState();
@@ -236,23 +236,23 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       if ((data.errors?.length ?? 0) > 0) {
         const firstError = data.errors?.[0]?.error;
         toast.error(
-          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，Đã làm mới ${data.refreshed ?? 0} một，thất bại ${data.errors?.length ?? 0} một${firstError ? `, lỗi đầu tiên: ${firstError}` : ""}`,
+          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，Đã làm mới ${data.refreshed ?? 0} một，thất bại ${data.errors?.length ?? 0} một${firstError ? `, first error: ${firstError}` : ""}`,
         );
       } else {
         toast.success(
-          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，bỏ qua ${data.skipped ?? 0} trùng lặp，Thông tin tài khoản đã được tự động làm mới`,
+          `${successText ?? "Đã nhập xong"}，Mới ${data.added ?? 0} một，skip ${data.skipped ?? 0} trùng lặp，Thông tin accounts đã được tự động làm mới`,
         );
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không thể nhập tài khoản";
+      const message = error instanceof Error ? error.message : "Không thể nhập accounts";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleImportTokenText = async () => {
-    await submitTokens(splitTokens(tokenInput), "Đã hoàn tất nhập token truy cập");
+  const handleImporttokensText = async () => {
+    await submittokenss(splittokenss(tokenInput), "Đã hoàn tất nhập token truy cập");
   };
 
   // Từ ủy quyền：lấy authorize URL，Mở ngay trong cửa sổ mới，Thuận tiện cho người dùng đăng nhập
@@ -274,10 +274,10 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
     }
   };
 
-  // dán lại callback URL Hoàn tất trao đổi token + Đặt hàng
+  // dán lại callback URL Done trao đổi token + Đặt hàng
   const handleFinishOAuth = async () => {
     if (!oauthSession) {
-      toast.error("Vui lòng nhấp vào trước\"Mở trang ủy quyền\"Nhận phiên");
+      toast.error("Vui lòng nhấp vào trước\"Open authorization page\"Nhận phiên");
       return;
     }
     const trimmed = oauthCallbackInput.trim();
@@ -296,11 +296,11 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       if ((data.errors?.length ?? 0) > 0) {
         const firstError = data.errors?.[0]?.error;
         toast.error(
-          `Đăng nhập OAuth đã hoàn tất, ${data.added ?? 0} mới, ${data.refreshed ?? 0} được làm mới, không thành công ${data.errors?.length ?? 0} ${firstError? `, lỗi đầu tiên: ${firstError}` : ""}`,
+          `Login OAuth đã hoàn tất, ${data.added ?? 0} mới, ${data.refreshed ?? 0} được làm mới, không thành công ${data.errors?.length ?? 0} ${firstError? `, first error: ${firstError}` : ""}`,
         );
       } else {
         toast.success(
-          `Đăng nhập OAuth đã hoàn tất, ${data.added ?? 0} đã thêm, ${data.skipped ?? 0} bản sao bị bỏ qua, thông tin tài khoản đã được tự động làm mới`,
+          `Login OAuth đã hoàn tất, ${data.added ?? 0} đã additional, ${data.skipped ?? 0} bản sao bị skip, thông tin accounts đã được tự động làm mới`,
         );
       }
     } catch (error) {
@@ -338,15 +338,15 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
 
     try {
       const content = await readFileAsText(file);
-      const tokens = splitTokens(content);
+      const tokens = splittokenss(content);
 
       if (tokens.length === 0) {
-        toast.error("Không có Token hợp lệ nào được đọc trong tệp TXT.");
+        toast.error("Không có tokens hợp lệ nào được đọc trong tệp TXT.");
         return;
       }
 
-      setTokenInput((prev) => {
-        const next = [...splitTokens(prev), ...tokens];
+      settokensInput((prev) => {
+        const next = [...splittokenss(prev), ...tokens];
         return next.join("\n");
       });
       toast.success(`Đọc token ${file.name} từ ${tokens.length}`);
@@ -364,14 +364,14 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
 
     try {
       const payload = JSON.parse(sessionInput) as unknown;
-      const token = getSessionAccessToken(payload);
+      const token = getSessionAccesstokens(payload);
 
       if (!token) {
-        toast.error("accessToken không được trích xuất từ JSON phiên");
+        toast.error("accesstokens không được trích xuất từ JSON phiên");
         return;
       }
 
-      await submitTokens([token], "Quá trình nhập JSON của phiên đã hoàn tất");
+      await submittokenss([token], "Quá trình nhập JSON của phiên đã hoàn tất");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Phân tích cú pháp JSON của phiên không thành công";
       toast.error(message);
@@ -393,7 +393,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
         return;
       }
 
-      await submitTokens([account.access_token], "Đã hoàn tất quá trình nhập JSON xác thực Codex", [account]);
+      await submittokenss([account.access_token], "Đã hoàn tất quá trình nhập JSON xác thực Codex", [account]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Xác thực Codex Phân tích cú pháp JSON không thành công";
       toast.error(message);
@@ -426,7 +426,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       const errorCount = results.filter((item) => item.accounts.length === 0).length;
 
       if (parsedAccountCount === 0) {
-        toast.error("Không đọc được access_token hợp lệ nào từ các tệp JSON tài khoản này");
+        toast.error("No valid access token found in these account JSON files.");
         return;
       }
 
@@ -438,14 +438,14 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       });
       setConfirmOpen(true);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Đọc tệp JSON tài khoản thất bại";
+      const message = error instanceof Error ? error.message : "Failed to read account JSON files.";
       toast.error(message);
     }
   };
 
   const renderMethodBody = () => {
     if (method === "token") {
-      const tokenCount = splitTokens(tokenInput).length;
+      const tokenCount = splittokenss(tokenInput).length;
 
       return (
         <div className="space-y-4">
@@ -456,24 +456,24 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               className="inline-flex items-center gap-1 text-sm text-stone-500 transition hover:text-stone-800"
             >
               <ArrowLeft className="size-4" />
-              Quay lại chế độ nhập
+              Back to import mode
             </button>
-            <span className="text-xs text-stone-400">nhận dạng hiện tại {tokenCount} một Token</span>
+            <span className="text-xs text-stone-400">currently identified {tokenCount} tokens</span>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">Danh sách token truy cập</label>
+            <label className="text-sm font-medium text-stone-700">Access Token List</label>
             <Textarea
-              placeholder="Một token truy cập trên mỗi dòng..."
+              placeholder="One access token per line..."
               value={tokenInput}
-              onChange={(event) => setTokenInput(event.target.value)}
+              onChange={(event) => settokensInput(event.target.value)}
               className="min-h-56 resize-none rounded-xl border-stone-200"
             />
           </div>
           <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <div className="text-sm font-medium text-stone-800">Nhập từ tệp TXT</div>
-                <div className="text-sm leading-6 text-stone-500">Hỗ trợ `.txt` và nội dung tệp cũng là một Token trên mỗi dòng.</div>
+                <div className="text-sm font-medium text-stone-800">Import from TXT file</div>
+                <div className="text-sm leading-6 text-stone-500">Supports `.txt` files with one token per line.</div>
               </div>
               <Button
                 type="button"
@@ -483,7 +483,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                 disabled={isSubmitting}
               >
                 <FileText className="size-4" />
-                chọn TXT
+                Select TXT
               </Button>
             </div>
           </div>
@@ -507,10 +507,10 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
             className="inline-flex items-center gap-1 text-sm text-stone-500 transition hover:text-stone-800"
           >
             <ArrowLeft className="size-4" />
-            Quay lại chế độ nhập
+            Back to import mode
           </button>
           <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-600">
-            mở
+            Open
             {" "}
             <a
               href={sessionUrl}
@@ -521,18 +521,18 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               {sessionUrl}
               <ExternalLink className="size-3.5" />
             </a>
-            ，Sao chép toàn bộ trang trả lại JSON，Hệ thống sẽ tự động trích xuất `accessToken` nhập。
+            , copy the entire JSON returned on the page, and the system will automatically extract access tokens for import.
           </div>
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-            <div className="font-medium">Cảnh báo rủi ro</div>
+            <div className="font-medium">Risk Warning</div>
             <div>
-              Đừng sử dụng tài khoản chính，Cố gắng sử dụng tài khoản phụ (clone) để nhập，Tránh nguy cơ bị cấm tài khoản。Dự án này không chịu bất kỳ trách nhiệm nào về rủi ro đóng tài khoản。
+              Do not use your main account. Try to use secondary accounts (clones) to import to avoid account bans. This project does not assume any responsibility for the risk of account closures.
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-stone-700">Session JSON</label>
             <Textarea
-              placeholder='Dán hoàn tất JSON，Ví dụ có chứa &quot;accessToken&quot; đối tượng...'
+              placeholder='Paste the complete JSON containing "accessToken" or similar properties...'
               value={sessionInput}
               onChange={(event) => setSessionInput(event.target.value)}
               className="min-h-56 resize-none rounded-xl border-stone-200 font-mono text-xs"
@@ -551,19 +551,19 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
             className="inline-flex items-center gap-1 text-sm text-stone-500 transition hover:text-stone-800"
           >
             <ArrowLeft className="size-4" />
-            Quay lại chế độ nhập
+            Back to import mode
           </button>
           <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-600 space-y-2">
-            <div className="font-medium text-stone-800">Các bước thao tác</div>
+            <div className="font-medium text-stone-800">Steps</div>
             <ol className="list-decimal pl-5 space-y-1">
-              <li>(Tùy chọn) Điền địa chỉ email tài khoản ChatGPT của bạn và trang đăng nhập sẽ được điền sẵn.</li>
-              <li>Nhấp vào &quot;Mở trang ủy quyền&quot; bên dưới và đăng nhập vào tài khoản ChatGPT của bạn trong tab mới.</li>
-              <li>Sau khi đăng nhập, trình duyệt sẽ chuyển tới <code className="rounded bg-stone-200 px-1">platform.openai.com/auth/callback?code=...</code>. Sao chép ngay toàn bộ URL từ thanh địa chỉ (hoặc mở F12 để lấy dòng gọi lại trong Mạng và nhấp chuột phải vào Sao chép → Sao chép URL).</li>
-              <li>Dán URL gọi lại vào hộp nhập bên dưới và nhấp vào &quot;Hoàn tất nhập&quot;.</li>
+              <li>(Optional) Fill in your ChatGPT account email, and the login page will be pre-filled.</li>
+              <li>Click &quot;Open authorization page&quot; below and log in to your ChatGPT account in a new tab.</li>
+              <li>After logging in, the browser will redirect to <code className="rounded bg-stone-200 px-1">platform.openai.com/auth/callback?code=...</code>. Copy the entire URL from the address bar immediately (or open F12 to get the callback line in the Network tab, right-click, and click Copy → Copy URL).</li>
+              <li>Paste the callback URL in the input box below and click &quot;Complete Import&quot;.</li>
             </ol>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">Email (tùy chọn điền trước)</label>
+            <label className="text-sm font-medium text-stone-700">Email (optional pre-fill)</label>
             <input
               type="email"
               placeholder="you@example.com"
@@ -581,7 +581,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               disabled={oauthStarting}
             >
               {oauthStarting ? <LoaderCircle className="size-4 animate-spin" /> : <ExternalLink className="size-4" />}
-              Mở trang ủy quyền
+              Open authorization page
             </Button>
           ) : (
             <div className="space-y-3">
@@ -596,7 +596,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                   onClick={() => void handleCopyAuthorizeUrl()}
                 >
                   <Copy className="size-4" />
-                  sao chép ủy quyền URL
+                  Copy authorization URL
                 </Button>
                 <Button
                   type="button"
@@ -605,7 +605,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                   onClick={() => window.open(oauthSession.authorize_url, "_blank", "noopener,noreferrer")}
                 >
                   <ExternalLink className="size-4" />
-                  Mở lại
+                  Reopen
                 </Button>
                 <Button
                   type="button"
@@ -616,11 +616,11 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                     setOauthCallbackInput("");
                   }}
                 >
-                  tái sinh
+                  Regenerate
                 </Button>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-stone-700">Dán URL gọi lại (hoặc chỉ mã)</label>
+                <label className="text-sm font-medium text-stone-700">Paste callback URL (or just code)</label>
                 <Textarea
                   placeholder={"https://platform.openai.com/auth/callback?code=...&state=..."}
                   value={oauthCallbackInput}
@@ -631,10 +631,10 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
             </div>
           )}
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-            <div className="font-medium">Lưu ý</div>
+            <div className="font-medium">Note</div>
             <div>
-              Mã ủy quyền（code）Chỉ có thể được sử dụng một lần。Nếu trình duyệt của callback Tải trang hoàn tất、Đã hiển thị OpenAI trang lỗi，Đó code Nhiều khả năng nó đã được tiêu thụ，
-              Xin vui lòng bấm vào &quot;tái sinh&quot; chạy lại。Toàn bộ quá trình nằm trong 10 Có thể hoàn thành trong vòng vài phút。
+              The authorization code can only be used once. If the callback page finishes loading or shows an OpenAI error page, the code has likely already been consumed.
+              Please click &quot;Regenerate&quot; to try again. The entire process can be completed within 10 minutes.
             </div>
           </div>
         </div>
@@ -650,13 +650,13 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
             className="inline-flex items-center gap-1 text-sm text-stone-500 transition hover:text-stone-800"
           >
             <ArrowLeft className="size-4" />
-            Quay lại chế độ nhập
+            Back to import mode
           </button>
           <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-5">
             <div className="space-y-2">
-              <div className="text-sm font-medium text-stone-800">Chọn tệp JSON tài khoản cục bộ</div>
+              <div className="text-sm font-medium text-stone-800">Select local account JSON file</div>
               <div className="text-sm leading-6 text-stone-500">
-                Hỗ trợ đối tượng tài khoản đơn hoặc mảng tất cả tài khoản được xuất từ dự án này, cũng tương thích với JSON CPA với mỗi tệp chứa một đối tượng tài khoản. Hệ thống sẽ tự động trích xuất `access_token` hoặc `accessToken`.
+                Supports single account objects or arrays of all accounts exported from this project, also compatible with CPA JSON files with one account object each. The system will automatically extract `access_token` or `accesstokens`.
               </div>
             </div>
             <Button
@@ -666,7 +666,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               disabled={isSubmitting}
             >
               <Files className="size-4" />
-              Chọn tệp JSON
+              Select JSON file
             </Button>
           </div>
           <input
@@ -679,8 +679,8 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
           />
           {pendingAccountJsonImport ? (
             <div className="rounded-2xl border border-stone-200 bg-white p-4 text-sm leading-6 text-stone-600">
-              Đọc lần cuối {pendingAccountJsonImport.parsedAccountCount} Token
-              {pendingAccountJsonImport.errorCount > 0 ? `, thêm ${pendingAccountJsonImport.errorCount} tệp không trích xuất thành công.` : ""}。
+              Last read {pendingAccountJsonImport.parsedAccountCount} tokens
+              {pendingAccountJsonImport.errorCount > 0 ? `, additional ${pendingAccountJsonImport.errorCount} files failed to extract successfully.` : ""}.
             </div>
           ) : null}
         </div>
@@ -696,12 +696,12 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
             className="inline-flex items-center gap-1 text-sm text-stone-500 transition hover:text-stone-800"
           >
             <ArrowLeft className="size-4" />
-            Quay lại chế độ nhập
+            Back to import mode
           </button>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">Xác thực Codex JSON</label>
+            <label className="text-sm font-medium text-stone-700">Codex Auth JSON</label>
             <Textarea
-              placeholder='Dán chứa "access_token"、"refresh_token"、"id_token" của Xác thực Codex JSON...'
+              placeholder='Paste Codex Auth JSON containing "access_token", "refresh_token", "id_token"...'
               value={codexAuthInput}
               onChange={(event) => setCodexAuthInput(event.target.value)}
               className="min-h-64 resize-none rounded-xl border-stone-200 font-mono text-xs"
@@ -714,38 +714,38 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
     return (
       <div className="space-y-3">
         <MethodCard
-          title="Đăng nhập OAuth vào tài khoản hiện có (với tính năng làm mới tự động)"
-          description="Sử dụng trình duyệt để đăng nhập vào tài khoản ChatGPT của bạn và điền URL gọi lại để nhận Refresh_token, URL này sẽ tự động được gia hạn trong nền."
+          title="OAuth login to existing account (with auto-refresh)"
+          description="Use your browser to log in to your ChatGPT account and fill in the callback URL to get the Refresh_token, which will be auto-renewed in the background."
           icon={LogIn}
           onClick={() => setMethod("oauth")}
         />
         <MethodCard
-          title="Nhập token truy cập"
-          description="Hỗ trợ dán trực tiếp, mỗi dòng một cái; cũng hỗ trợ đọc từ các tệp TXT, mỗi tệp một dòng."
+          title="Import Access tokenss"
+          description="Supports direct pasting, one per line; also supports reading from TXT files, one per line."
           icon={KeyRound}
           onClick={() => setMethod("token")}
         />
         <MethodCard
-          title="Nhập phiên JSON"
-          description="Sao chép JSON hoàn chỉnh từ API session của chatgpt.com và tự động trích xuất accessToken."
+          title="Import JSON Session"
+          description="Copy complete JSON from session API of chatgpt.com to automatically extract access tokens."
           icon={FileJson}
           onClick={() => setMethod("session")}
         />
         <MethodCard
-          title="Nhập JSON xác thực Codex"
-          description="Dán JSON xác thực Codex. Sau khi nhập, nguồn tài khoản được đánh dấu là codex."
+          title="Import Codex Auth JSON"
+          description="Paste the Codex authentication JSON. Once imported, the account source will be marked as codex."
           icon={FileJson}
           onClick={() => setMethod("codex-auth")}
         />
         <MethodCard
-          title="Nhập tệp JSON tài khoản"
-          description="Hỗ trợ đối tượng tài khoản đơn hoặc mảng tất cả tài khoản được xuất từ dự án này, cũng tương thích với các tệp JSON CPA."
+          title="Import Account JSON File"
+          description="Supports single account objects or arrays of all accounts exported from this project, also compatible with CPA JSON files."
           icon={Files}
           onClick={() => setMethod("account-json")}
         />
         <MethodCard
-          title="Nhập từ máy chủ CPA từ xa"
-          description="Đi tới trang cài đặt để định cấu hình máy chủ CPA từ xa trước khi thực hiện nhập."
+          title="Import from remote CPA server"
+          description="Go to settings page to configure remote CPA server before importing."
           icon={Files}
           onClick={() => {
             setOpen(false);
@@ -754,8 +754,8 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
           }}
         />
         <MethodCard
-          title="Nhập từ máy chủ Sub2API"
-          description="Đi tới trang cài đặt để định cấu hình máy chủ Sub2API, sau đó chọn tài khoản OpenAI để nhập."
+          title="Import from Sub2API server"
+          description="Go to settings page to configure Sub2API server, then select OpenAI accounts to import."
           icon={ServerCog}
           onClick={() => {
             setOpen(false);
@@ -778,35 +778,35 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
           disabled={disabled}
         >
           <Upload className="size-4" />
-          nhập
+          Import
         </Button>
         <DialogContent showCloseButton={false} className="rounded-2xl p-6">
           <DialogHeader className="gap-2">
             <DialogTitle>
               {method === "menu"
-                ? "Nhập tài khoản"
+                ? "Import Accounts"
                 : method === "token"
-                  ? "Nhập token truy cập"
+                  ? "Import Access tokenss"
                   : method === "session"
-                    ? "Nhập phiên JSON"
+                    ? "Import JSON Session"
                     : method === "codex-auth"
-                      ? "Nhập JSON xác thực Codex"
+                      ? "Import Codex Auth JSON"
                     : method === "oauth"
-                      ? "Đăng nhập OAuth vào tài khoản hiện có"
-                      : "Nhập JSON tài khoản"}
+                      ? "OAuth login to existing account"
+                      : "Import Account JSON"}
             </DialogTitle>
             <DialogDescription className="text-sm leading-6">
               {method === "menu"
-                ? "Chọn phương thức nhập. Sau khi nhập thành công, địa chỉ email, loại và hạn ngạch sẽ tự động được lấy."
+                ? "Select the import method. After successful import, the email address, type, and quota will be automatically retrieved."
                 : method === "token"
-                  ? "Hỗ trợ dán hoặc nhập thủ công từ tệp TXT, một Token trên mỗi dòng."
+                  ? "Supports pasting or manually importing from TXT files, one token per line."
                   : method === "session"
-                    ? "Dán JSON phiên hoàn chỉnh và hệ thống sẽ tự động trích xuất accessToken."
+                    ? "Paste complete session JSON, and the system will automatically extract accesstokens."
                     : method === "codex-auth"
-                      ? "Dán JSON xác thực Codex và hệ thống sẽ nhập nó theo nguồn codex."
+                      ? "Paste Codex Auth JSON, and the system will import it under codex source."
                     : method === "oauth"
-                      ? "Sử dụng trình duyệt của bạn để chạy OAuth tiêu chuẩn OpenAI và hệ thống sẽ tự động gia hạn sau khi bạn lấy lại được Refresh_token."
-                      : "Hỗ trợ đọc đối tượng tài khoản đơn hoặc mảng tất cả tài khoản, và xác nhận số lượng trước khi gửi."}
+                      ? "Use your browser to run standard OpenAI OAuth, and the system will automatically renew after retrieving the Refresh_token."
+                      : "Supports reading single account objects or arrays of all accounts, and confirming the quantity before submitting."}
             </DialogDescription>
           </DialogHeader>
 
@@ -819,16 +819,16 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               onClick={() => setOpen(false)}
               disabled={footerDisabled}
             >
-              Hủy bỏ
+              Cancel
             </Button>
             {method === "token" ? (
               <Button
                 className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800"
-                onClick={() => void handleImportTokenText()}
+                onClick={() => void handleImporttokensText()}
                 disabled={footerDisabled}
               >
                 {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                nhập Token
+                Import Tokens
               </Button>
             ) : null}
             {method === "session" ? (
@@ -838,7 +838,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                 disabled={footerDisabled}
               >
                 {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                nhập JSON
+                Import JSON
               </Button>
             ) : null}
             {method === "codex-auth" ? (
@@ -848,7 +848,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                 disabled={footerDisabled}
               >
                 {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                nhập JSON
+                Import JSON
               </Button>
             ) : null}
             {method === "oauth" ? (
@@ -861,7 +861,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                 disabled={footerDisabled || !oauthSession || !oauthCallbackInput.trim()}
               >
                 {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                Nhập hoàn tất
+                Complete Import
               </Button>
             ) : null}
             {method === "account-json" ? (
@@ -873,7 +873,7 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
                 onClick={() => setConfirmOpen(true)}
                 disabled={footerDisabled || !pendingAccountJsonImport}
               >
-                Xem xác nhận nhập
+                Confirm Import
               </Button>
             ) : null}
           </DialogFooter>
@@ -883,14 +883,14 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="rounded-2xl p-6">
           <DialogHeader className="gap-2">
-            <DialogTitle>Xác nhận nhập token tài khoản</DialogTitle>
+            <DialogTitle>Confirm Importing Accounts</DialogTitle>
             <DialogDescription className="text-sm leading-6">
               {pendingAccountJsonImport
-                ? `Xác nhận rằng Token ${pendingAccountJsonImport.parsedAccountCount} đã được xác định. Bạn có muốn xác nhận việc nhập không?`
-                : "Chưa có token có thể nhập nào được đọc."}
+                ? `Confirm that ${pendingAccountJsonImport.parsedAccountCount} tokens have been identified. Do you want to proceed with the import?`
+                : "No importable tokens were read."}
               {pendingAccountJsonImport?.errorCount
-                ? `và các tệp ${pendingAccountJsonImport.errorCount} không được giải nén thành công.`
-                : "。"}
+                ? ` and ${pendingAccountJsonImport.errorCount} files failed to extract successfully.`
+                : "."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="pt-2">
@@ -900,21 +900,21 @@ export function AccountImportDialog({ disabled, onImported }: AccountImportDialo
               onClick={() => setConfirmOpen(false)}
               disabled={isSubmitting}
             >
-              Trở lại
+              Back
             </Button>
             <Button
               className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800"
               onClick={() =>
-                void submitTokens(
+                void submittokenss(
                   pendingAccountJsonImport?.tokens ?? [],
-                  "Đã hoàn tất quá trình nhập JSON tài khoản",
+                  "JSON account import complete",
                   pendingAccountJsonImport?.accounts ?? [],
                 )
               }
               disabled={isSubmitting || !pendingAccountJsonImport}
             >
               {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-              Xác nhận nhập
+              Confirm
             </Button>
           </DialogFooter>
         </DialogContent>

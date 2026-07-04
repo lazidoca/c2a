@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Quản lý pool tài khoản ChatGPT",
+  title: "ChatGPT Account Pool Manager",
   description: "ChatGPT account pool management dashboard",
 };
 

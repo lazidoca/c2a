@@ -60,7 +60,7 @@ export function BaseUrlCard() {
                 disabled={isSavingConfig}
               >
                 {isSavingConfig ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
-                Lưu cấu hình
+                Save cấu hình
               </Button>
             </div>
           </>

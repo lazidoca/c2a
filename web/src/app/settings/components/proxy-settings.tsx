@@ -58,7 +58,7 @@ export function ProxySettingsCard() {
 
   const handleSave = async () => {
     if (formEnabled && !formUrl.trim()) {
-      toast.error("Địa chỉ proxy phải được điền khi kích hoạt proxy");
+      toast.error("Proxy address phải được điền khi kích hoạt proxy");
       return;
     }
     setIsSaving(true);
@@ -70,9 +70,9 @@ export function ProxySettingsCard() {
       setSettings(data.proxy);
       setFormUrl(data.proxy.url);
       setFormEnabled(data.proxy.enabled);
-      toast.success("Đã lưu cấu hình proxy");
+      toast.success("Config saved proxy");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Lưu không thành công");
+      toast.error(error instanceof Error ? error.message : "Save không thành công");
     } finally {
       setIsSaving(false);
     }
@@ -81,7 +81,7 @@ export function ProxySettingsCard() {
   const handleTest = async () => {
     const candidate = formUrl.trim();
     if (!candidate) {
-      toast.error("Vui lòng điền địa chỉ proxy trước");
+      toast.error("Please enter the proxy address first");
       return;
     }
     setIsTesting(true);
@@ -90,12 +90,12 @@ export function ProxySettingsCard() {
       const data = await testProxy(candidate);
       setTestResult(data.result);
       if (data.result.ok) {
-        toast.success(`Có sẵn proxy (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
+        toast.success(`Proxy available (${data.result.latency_ms} ms, HTTP ${data.result.status})`);
       } else {
-        toast.error(`proxy không có sẵn：${data.result.error ?? "lỗi không xác định"}`);
+        toast.error(`Proxy unavailable: ${data.result.error ?? "lỗi không xác định"}`);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Proxy thử nghiệm không thành công");
+      toast.error(error instanceof Error ? error.message : "Proxy test failed");
     } finally {
       setIsTesting(false);
     }
@@ -168,7 +168,7 @@ export function ProxySettingsCard() {
                     proxy có sẵn：HTTP {testResult.status}，thời gian {testResult.latency_ms} ms
                   </>
                 ) : (
-                  <>proxy không có sẵn：{testResult.error ?? "lỗi không xác định"}（thời gian {testResult.latency_ms} ms）</>
+                  <>Proxy unavailable: {testResult.error ?? "lỗi không xác định"}（thời gian {testResult.latency_ms} ms）</>
                 )}
               </div>
             ) : null}

@@ -350,7 +350,7 @@ export function ImageLightbox({
           onPointerDownOutside={(e) => e.preventDefault()}
         >
           <DialogPrimitive.Title className="sr-only">
-            Xem trước hình ảnh
+            View trước hình ảnh
           </DialogPrimitive.Title>
 
           <div className="absolute top-[calc(env(safe-area-inset-top)+1rem)] right-4 z-10 flex items-center gap-2">

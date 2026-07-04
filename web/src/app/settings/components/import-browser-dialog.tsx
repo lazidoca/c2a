@@ -64,9 +64,9 @@ export function ImportBrowserDialog() {
     <Dialog open={browserOpen} onOpenChange={setBrowserOpen}>
       <DialogContent showCloseButton={false} className="max-h-[90vh] max-w-5xl rounded-2xl p-6">
         <DialogHeader className="gap-2">
-          <DialogTitle>Chọn tài khoản để nhập</DialogTitle>
+          <DialogTitle>Chọn accounts để nhập</DialogTitle>
           <DialogDescription className="text-sm leading-6">
-            {browserPool ? `Từ ${browserPool.name || browserPool.base_url}` : "Đọc danh sách tài khoản từ xa"}
+            {browserPool ? `Từ ${browserPool.name || browserPool.base_url}` : "Đọc danh sách accounts từ xa"}
           </DialogDescription>
         </DialogHeader>
 
@@ -76,7 +76,7 @@ export function ImportBrowserDialog() {
             <Input
               value={fileQuery}
               onChange={(event) => setFileQuery(event.target.value)}
-              placeholder="Tìm kiếm email hoặc tên tập tin"
+              placeholder="Search email hoặc tên tập tin"
               className="h-10 rounded-xl border-stone-200 bg-white pl-10"
             />
           </div>
@@ -113,7 +113,7 @@ export function ImportBrowserDialog() {
           </div>
           <div className="max-h-[420px] overflow-auto">
             {pagedFiles.length === 0 ? (
-              <div className="flex items-center justify-center py-12 text-sm text-stone-400">Không có tài khoản từ xa phù hợp</div>
+              <div className="flex items-center justify-center py-12 text-sm text-stone-400">Không có accounts từ xa phù hợp</div>
             ) : (
               <div className="divide-y divide-stone-100">
                 {pagedFiles.map((item) => (
@@ -168,7 +168,7 @@ export function ImportBrowserDialog() {
             onClick={() => setBrowserOpen(false)}
             disabled={isStartingImport}
           >
-            Hủy bỏ
+            Cancel
           </Button>
           <Button
             className="h-10 rounded-xl bg-stone-950 px-5 text-white hover:bg-stone-800"
@@ -176,7 +176,7 @@ export function ImportBrowserDialog() {
             disabled={isStartingImport || selectedNames.length === 0}
           >
             {isStartingImport ? <LoaderCircle className="size-4 animate-spin" /> : <Import className="size-4" />}
-            Nhập tài khoản đã chọn
+            Import Accounts đã chọn
           </Button>
         </DialogFooter>
       </DialogContent>

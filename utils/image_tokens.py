@@ -104,7 +104,7 @@ def _patch_limits(model: str, detail: str) -> tuple[int, int] | None:
     name = _model_name(model)
     if any(name.startswith(prefix) for prefix in PATCH_1536_MODELS):
         return 1536, 2048
-    if name.startswith("gpt-5.5"):
+    if name.startswith("gpt-5.5") or name.startswith("gpt-5-5"):
         return (10000, 6000) if detail in {"auto", "original"} else (2500, 2048)
     if name.startswith("gpt-5.4"):
         return (10000, 6000) if detail == "original" else (2500, 2048)

@@ -12,11 +12,11 @@ import { SearchPanel } from "./components/search-panel";
 import { SkillPanel } from "./components/skill-panel";
 
 const tabs = [
-  { value: "skills", title: "Tìm kiếmKỹ năng" },
-  { value: "search", title: "Tìm kiếm" },
-  { value: "ppt", title: "Tạo PPT" },
-  { value: "psd", title: "thế hệ PSD" },
-  { value: "chat", title: "đối thoại" },
+  { value: "skills", title: "SearchSkill" },
+  { value: "search", title: "Search" },
+  { value: "ppt", title: "PPT" },
+  { value: "psd", title: "PSD" },
+  { value: "chat", title: "Chat" },
 ];
 
 export default function DebugPage() {
